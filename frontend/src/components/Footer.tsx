@@ -232,8 +232,9 @@ export default function Footer() {
 
         {/* Bottom Bar */}
         <div className="border-t border-theme-tertiary pt-6 sm:pt-8 mt-6 sm:mt-8">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-6">
-            <div className="flex flex-wrap items-center gap-4 sm:gap-6 w-full sm:w-auto justify-between sm:justify-start">
+          <div className="flex flex-row justify-between items-center gap-4 sm:gap-6">
+            {/* Left side - Social links */}
+            <div className="flex items-center gap-4 sm:gap-6">
               <a
                 href="https://twitter.com/somnia_network"
                 target="_blank"
@@ -251,7 +252,8 @@ export default function Footer() {
                 GitHub
               </a>
             </div>
-            <div className="flex flex-wrap items-center gap-4 sm:gap-4 text-xs sm:text-sm text-theme-secondary w-full sm:w-auto justify-between sm:justify-end">
+            {/* Right side - Policy links */}
+            <div className="flex items-center gap-4 sm:gap-4 text-xs sm:text-sm text-theme-secondary">
               <a
                 href="#"
                 className="hover:text-theme-primary transition-colors"
