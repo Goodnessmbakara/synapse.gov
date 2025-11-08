@@ -10,29 +10,29 @@ export default function Home() {
   return (
     <Layout notifications={notifications} onDismissNotification={dismissNotification}>
       {/* Hero Section with Dynamic Images (Tally-inspired) */}
-      <section className="mb-16">
+      <section className="mb-8 sm:mb-12 md:mb-16">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-12"
+          className="text-center mb-6 sm:mb-8 md:mb-12"
         >
-          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-3 sm:mb-4">
             Real-Time DAO Governance
           </h1>
-          <p className="text-base sm:text-lg md:text-xl text-dark-text-secondary mb-8 max-w-2xl mx-auto px-4">
+          <p className="text-base sm:text-lg md:text-xl text-dark-text-secondary mb-6 sm:mb-8 max-w-2xl mx-auto px-4">
             Instant proposal appearance, live vote tracking, and real-time quorum visualization.
             Powered by Somnia Data Streams.
           </p>
-          <div className="flex flex-col sm:flex-row flex-wrap gap-4 justify-center px-4">
-            <Link to="/proposals" className="btn-primary">
+          <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 justify-center px-4">
+            <Link to="/proposals" className="btn-primary w-full sm:w-auto min-h-[44px]">
               View Proposals
             </Link>
             <a
               href="https://docs.somnia.network/somnia-data-streams"
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-secondary"
+              className="btn-secondary w-full sm:w-auto min-h-[44px]"
             >
               Learn More
             </a>
@@ -125,15 +125,15 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="grid md:grid-cols-3 gap-4 sm:gap-6 mb-16 px-4">
+      <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 mb-8 sm:mb-12 md:mb-16 px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
           className="card text-center"
         >
-          <div className="text-4xl mb-4">⚡</div>
-          <h3 className="text-xl font-semibold mb-2">Instant Updates</h3>
+          <div className="text-3xl sm:text-4xl mb-3 sm:mb-4">⚡</div>
+          <h3 className="text-lg sm:text-xl font-semibold mb-2">Instant Updates</h3>
           <p className="text-dark-text-secondary text-sm">
             Proposals and votes appear instantly without page refresh
           </p>
@@ -145,8 +145,8 @@ export default function Home() {
           transition={{ delay: 0.4 }}
           className="card text-center"
         >
-          <div className="text-4xl mb-4">📊</div>
-          <h3 className="text-xl font-semibold mb-2">Live Tracking</h3>
+          <div className="text-3xl sm:text-4xl mb-3 sm:mb-4">📊</div>
+          <h3 className="text-lg sm:text-xl font-semibold mb-2">Live Tracking</h3>
           <p className="text-dark-text-secondary text-sm">
             Watch vote counts and quorum progress update in real-time
           </p>
@@ -156,10 +156,10 @@ export default function Home() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="card text-center"
+          className="card text-center sm:col-span-2 md:col-span-1"
         >
-          <div className="text-4xl mb-4">🔗</div>
-          <h3 className="text-xl font-semibold mb-2">Composable</h3>
+          <div className="text-3xl sm:text-4xl mb-3 sm:mb-4">🔗</div>
+          <h3 className="text-lg sm:text-xl font-semibold mb-2">Composable</h3>
           <p className="text-dark-text-secondary text-sm">
             Integrate with any DAO framework using Somnia Data Streams
           </p>

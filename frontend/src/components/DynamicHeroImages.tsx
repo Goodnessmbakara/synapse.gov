@@ -67,18 +67,18 @@ export default function DynamicHeroImages() {
   return (
     <div 
       ref={containerRef} 
-      className="relative w-full h-[600px] md:h-[700px] overflow-hidden mb-16"
+      className="relative w-full h-[400px] sm:h-[500px] md:h-[700px] overflow-hidden mb-8 md:mb-16"
       style={{ perspective: '1000px' }}
     >
       {/* Background gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-dark-bg-primary via-dark-bg-secondary to-dark-bg-primary opacity-50" />
       
-      {/* Container for images */}
-      <div className="relative h-full flex items-center justify-center gap-4 md:gap-8 px-4" style={{ transformStyle: 'preserve-3d' }}>
+      {/* Container for images - horizontal scroll on mobile, centered on desktop */}
+      <div className="relative h-full flex items-center gap-4 md:gap-8 px-4 overflow-x-auto scrollbar-hide snap-x md:overflow-x-visible md:justify-center" style={{ transformStyle: 'preserve-3d' }}>
         {images.map((image, index) => (
           <motion.div
             key={image.id}
-            className="relative w-full max-w-[300px] md:max-w-[400px] h-[400px] md:h-[500px] rounded-2xl overflow-hidden shadow-2xl"
+            className="relative flex-shrink-0 w-[280px] sm:w-[320px] md:max-w-[400px] h-[300px] sm:h-[350px] md:h-[500px] rounded-2xl overflow-hidden shadow-2xl snap-start"
             style={{
               rotateX: image.rotateX,
               rotateY: image.rotateY,
@@ -103,7 +103,7 @@ export default function DynamicHeroImages() {
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1),transparent_50%)]" />
             
             {/* Content overlay */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-white z-10">
+            <div className="absolute inset-0 flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 text-white z-10">
               <motion.div
                 initial={{ scale: 0.9 }}
                 animate={{ scale: 1 }}
@@ -113,16 +113,16 @@ export default function DynamicHeroImages() {
                   repeatType: 'reverse',
                   ease: 'easeInOut',
                 }}
-                className="text-6xl md:text-7xl mb-4"
+                className="text-4xl sm:text-5xl md:text-7xl mb-3 sm:mb-4"
               >
                 {index === 0 && '📋'}
                 {index === 1 && '🗳️'}
                 {index === 2 && '📊'}
               </motion.div>
-              <h3 className="text-2xl md:text-3xl font-bold mb-2 text-center">
+              <h3 className="text-lg sm:text-xl md:text-3xl font-bold mb-1 sm:mb-2 text-center leading-tight">
                 {image.title}
               </h3>
-              <p className="text-sm md:text-base text-white/80 text-center">
+              <p className="text-xs sm:text-sm md:text-base text-white/80 text-center">
                 {image.description}
               </p>
             </div>
@@ -143,9 +143,9 @@ export default function DynamicHeroImages() {
         ))}
       </div>
 
-      {/* Scroll indicator */}
+      {/* Scroll indicator - Hidden on mobile, shown on desktop */}
       <motion.div
-        className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center gap-2 text-dark-text-secondary"
+        className="hidden md:flex absolute bottom-8 left-1/2 transform -translate-x-1/2 flex-col items-center gap-2 text-dark-text-secondary"
         initial={{ opacity: 1 }}
         animate={{ opacity: [1, 0.5, 1] }}
         transition={{ duration: 2, repeat: Infinity }}
