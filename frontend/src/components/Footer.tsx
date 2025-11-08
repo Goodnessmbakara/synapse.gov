@@ -94,9 +94,9 @@ export default function Footer() {
 
       {/* Footer Content */}
       <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16">
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 md:gap-12 mb-6 sm:mb-8">
+        <div className="grid grid-cols-3 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-8 md:gap-12 mb-6 sm:mb-8">
           {/* Logo and Description */}
-          <div className="col-span-2 sm:col-span-2 md:col-span-1">
+          <div className="col-span-3 sm:col-span-2 md:col-span-1">
             <Link to="/" className="flex items-center gap-3 mb-3 sm:mb-4">
               <img src="/logo.svg" alt="SynapseGov" className="w-8 h-8" />
               <span className="text-lg sm:text-xl font-bold text-theme-primary">SynapseGov</span>
