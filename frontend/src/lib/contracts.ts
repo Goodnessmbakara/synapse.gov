@@ -1,11 +1,21 @@
 // Contract ABI and interaction utilities
+// Updated to match deployed contract: 0xDdc49E1bA14E64c824B7eDF8924572618fe100AF
 
 import { Address } from 'viem';
 
 export const GOVERNANCE_CONTRACT_ADDRESS = 
-  (import.meta.env.VITE_CONTRACT_ADDRESS || '0x0000000000000000000000000000000000000000') as Address;
+  (import.meta.env.VITE_CONTRACT_ADDRESS || '0xDdc49E1bA14E64c824B7eDF8924572618fe100AF') as Address;
 
 export const GovernanceABI = [
+  {
+    inputs: [
+      { internalType: 'uint256', name: 'proposalId', type: 'uint256' },
+    ],
+    name: 'checkQuorum',
+    outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
   {
     inputs: [
       { internalType: 'string', name: 'title', type: 'string' },
@@ -20,15 +30,16 @@ export const GovernanceABI = [
   {
     inputs: [
       { internalType: 'uint256', name: 'proposalId', type: 'uint256' },
-      { internalType: 'bool', name: 'support', type: 'bool' },
     ],
-    name: 'vote',
+    name: 'executeProposal',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',
   },
   {
-    inputs: [{ internalType: 'uint256', name: 'proposalId', type: 'uint256' }],
+    inputs: [
+      { internalType: 'uint256', name: 'proposalId', type: 'uint256' },
+    ],
     name: 'getProposal',
     outputs: [
       {
@@ -61,15 +72,7 @@ export const GovernanceABI = [
   {
     inputs: [
       { internalType: 'uint256', name: 'proposalId', type: 'uint256' },
-      { internalType: 'address', name: 'voter', type: 'address' },
     ],
-    name: 'hasVoted',
-    outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [{ internalType: 'uint256', name: 'proposalId', type: 'uint256' }],
     name: 'getQuorum',
     outputs: [
       { internalType: 'uint256', name: 'current', type: 'uint256' },
@@ -79,9 +82,144 @@ export const GovernanceABI = [
     type: 'function',
   },
   {
-    inputs: [{ internalType: 'uint256', name: 'proposalId', type: 'uint256' }],
-    name: 'checkQuorum',
+    inputs: [
+      { internalType: 'uint256', name: 'proposalId', type: 'uint256' },
+      { internalType: 'address', name: 'voter', type: 'address' },
+    ],
+    name: 'getVote',
+    outputs: [
+      {
+        components: [
+          { internalType: 'address', name: 'voter', type: 'address' },
+          { internalType: 'bool', name: 'support', type: 'bool' },
+          { internalType: 'uint256', name: 'votingPower', type: 'uint256' },
+          { internalType: 'uint256', name: 'timestamp', type: 'uint256' },
+        ],
+        internalType: 'struct Governance.Vote',
+        name: '',
+        type: 'tuple',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      { internalType: 'uint256', name: 'proposalId', type: 'uint256' },
+    ],
+    name: 'getVoters',
+    outputs: [{ internalType: 'address[]', name: '', type: 'address[]' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      { internalType: 'uint256', name: 'proposalId', type: 'uint256' },
+      { internalType: 'address', name: 'voter', type: 'address' },
+    ],
+    name: 'hasVoted',
     outputs: [{ internalType: 'bool', name: '', type: 'bool' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'proposalCount',
+    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      { internalType: 'uint256', name: '', type: 'uint256' },
+    ],
+    name: 'proposals',
+    outputs: [
+      { internalType: 'uint256', name: 'id', type: 'uint256' },
+      { internalType: 'string', name: 'title', type: 'string' },
+      { internalType: 'string', name: 'description', type: 'string' },
+      { internalType: 'address', name: 'proposer', type: 'address' },
+      { internalType: 'uint256', name: 'votesFor', type: 'uint256' },
+      { internalType: 'uint256', name: 'votesAgainst', type: 'uint256' },
+      { internalType: 'uint256', name: 'deadline', type: 'uint256' },
+      { internalType: 'bool', name: 'executed', type: 'bool' },
+      { internalType: 'uint256', name: 'createdAt', type: 'uint256' },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'quorumThreshold',
+    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      { internalType: 'address', name: 'voter', type: 'address' },
+      { internalType: 'uint256', name: 'power', type: 'uint256' },
+    ],
+    name: 'setVotingPower',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'totalVotingPower',
+    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      { internalType: 'uint256', name: 'proposalId', type: 'uint256' },
+      { internalType: 'bool', name: 'support', type: 'bool' },
+    ],
+    name: 'vote',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      { internalType: 'uint256', name: '', type: 'uint256' },
+      { internalType: 'uint256', name: '', type: 'uint256' },
+    ],
+    name: 'voters',
+    outputs: [{ internalType: 'address', name: '', type: 'address' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      { internalType: 'uint256', name: '', type: 'uint256' },
+      { internalType: 'address', name: '', type: 'address' },
+    ],
+    name: 'votes',
+    outputs: [
+      { internalType: 'address', name: 'voter', type: 'address' },
+      { internalType: 'bool', name: 'support', type: 'bool' },
+      { internalType: 'uint256', name: 'votingPower', type: 'uint256' },
+      { internalType: 'uint256', name: 'timestamp', type: 'uint256' },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'votingPeriod',
+    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      { internalType: 'address', name: '', type: 'address' },
+    ],
+    name: 'votingPower',
+    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
     stateMutability: 'view',
     type: 'function',
   },
@@ -100,11 +238,8 @@ export const GovernanceABI = [
     anonymous: false,
     inputs: [
       { indexed: true, internalType: 'uint256', name: 'proposalId', type: 'uint256' },
-      { indexed: true, internalType: 'address', name: 'voter', type: 'address' },
-      { indexed: false, internalType: 'bool', name: 'support', type: 'bool' },
-      { indexed: false, internalType: 'uint256', name: 'votingPower', type: 'uint256' },
     ],
-    name: 'VoteCast',
+    name: 'ProposalExecuted',
     type: 'event',
   },
   {
@@ -119,9 +254,11 @@ export const GovernanceABI = [
     anonymous: false,
     inputs: [
       { indexed: true, internalType: 'uint256', name: 'proposalId', type: 'uint256' },
+      { indexed: true, internalType: 'address', name: 'voter', type: 'address' },
+      { indexed: false, internalType: 'bool', name: 'support', type: 'bool' },
+      { indexed: false, internalType: 'uint256', name: 'votingPower', type: 'uint256' },
     ],
-    name: 'ProposalExecuted',
+    name: 'VoteCast',
     type: 'event',
   },
 ] as const;
-
