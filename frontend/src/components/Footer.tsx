@@ -93,22 +93,22 @@ export default function Footer() {
       />
 
       {/* Footer Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-12 mb-8">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 md:py-16">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 md:gap-12 mb-6 sm:mb-8">
           {/* Logo and Description */}
-          <div className="md:col-span-1">
-            <Link to="/" className="flex items-center gap-3 mb-4">
+          <div className="col-span-2 sm:col-span-2 md:col-span-1">
+            <Link to="/" className="flex items-center gap-3 mb-3 sm:mb-4">
               <img src="/logo.svg" alt="SynapseGov" className="w-8 h-8" />
-              <span className="text-xl font-bold text-theme-primary">SynapseGov</span>
+              <span className="text-lg sm:text-xl font-bold text-theme-primary">SynapseGov</span>
             </Link>
-            <p className="text-sm text-theme-secondary">
+            <p className="text-xs sm:text-sm text-theme-secondary">
               Real-time DAO governance
             </p>
           </div>
 
           {/* Resources */}
           <div>
-            <h3 className="text-sm font-semibold text-theme-primary mb-4">
+            <h3 className="text-xs sm:text-sm font-semibold text-theme-primary mb-3 sm:mb-4">
               Resources
             </h3>
             <ul className="space-y-2">
@@ -117,7 +117,7 @@ export default function Footer() {
                   href="https://docs.somnia.network/somnia-data-streams"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-theme-secondary hover:text-theme-primary transition-colors"
+                  className="text-xs sm:text-sm text-theme-secondary hover:text-theme-primary transition-colors block"
                 >
                   Documentation
                 </a>
@@ -127,7 +127,7 @@ export default function Footer() {
                   href="https://docs.somnia.network"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-theme-secondary hover:text-theme-primary transition-colors"
+                  className="text-xs sm:text-sm text-theme-secondary hover:text-theme-primary transition-colors block"
                 >
                   Blog
                 </a>
@@ -135,7 +135,7 @@ export default function Footer() {
               <li>
                 <Link
                   to="/proposals"
-                  className="text-sm text-theme-secondary hover:text-theme-primary transition-colors"
+                  className="text-xs sm:text-sm text-theme-secondary hover:text-theme-primary transition-colors block"
                 >
                   Proposals
                 </Link>
@@ -145,7 +145,7 @@ export default function Footer() {
                   href="https://github.com/somnia-network"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-theme-secondary hover:text-theme-primary transition-colors"
+                  className="text-xs sm:text-sm text-theme-secondary hover:text-theme-primary transition-colors block"
                 >
                   GitHub
                 </a>
@@ -155,7 +155,7 @@ export default function Footer() {
 
           {/* Company */}
           <div>
-            <h3 className="text-sm font-semibold text-theme-primary mb-4">
+            <h3 className="text-xs sm:text-sm font-semibold text-theme-primary mb-3 sm:mb-4">
               Company
             </h3>
             <ul className="space-y-2">
@@ -164,7 +164,7 @@ export default function Footer() {
                   href="https://somnia.network"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-theme-secondary hover:text-theme-primary transition-colors"
+                  className="text-xs sm:text-sm text-theme-secondary hover:text-theme-primary transition-colors block"
                 >
                   About
                 </a>
@@ -172,7 +172,7 @@ export default function Footer() {
               <li>
                 <a
                   href="mailto:support@somnia.network"
-                  className="text-sm text-theme-secondary hover:text-theme-primary transition-colors"
+                  className="text-xs sm:text-sm text-theme-secondary hover:text-theme-primary transition-colors block"
                 >
                   Support
                 </a>
@@ -182,7 +182,7 @@ export default function Footer() {
                   href="https://somnia.network/team"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-theme-secondary hover:text-theme-primary transition-colors"
+                  className="text-xs sm:text-sm text-theme-secondary hover:text-theme-primary transition-colors block"
                 >
                   Team
                 </a>
@@ -191,8 +191,8 @@ export default function Footer() {
           </div>
 
           {/* Community */}
-          <div>
-            <h3 className="text-sm font-semibold text-theme-primary mb-4">
+          <div className="col-span-2 sm:col-span-2 md:col-span-1">
+            <h3 className="text-xs sm:text-sm font-semibold text-theme-primary mb-3 sm:mb-4">
               Community
             </h3>
             <ul className="space-y-2">
@@ -201,7 +201,7 @@ export default function Footer() {
                   href="https://twitter.com/somnia_network"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-theme-secondary hover:text-theme-primary transition-colors"
+                  className="text-xs sm:text-sm text-theme-secondary hover:text-theme-primary transition-colors block"
                 >
                   Twitter
                 </a>
@@ -211,7 +211,7 @@ export default function Footer() {
                   href="https://discord.gg/somnia"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-theme-secondary hover:text-theme-primary transition-colors"
+                  className="text-xs sm:text-sm text-theme-secondary hover:text-theme-primary transition-colors block"
                 >
                   Discord
                 </a>
@@ -221,7 +221,7 @@ export default function Footer() {
                   href="https://github.com/somnia-network"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-theme-secondary hover:text-theme-primary transition-colors"
+                  className="text-xs sm:text-sm text-theme-secondary hover:text-theme-primary transition-colors block"
                 >
                   GitHub
                 </a>
@@ -231,14 +231,14 @@ export default function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-theme-tertiary pt-8 mt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex items-center gap-6">
+        <div className="border-t border-theme-tertiary pt-6 sm:pt-8 mt-6 sm:mt-8">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-6">
+            <div className="flex flex-wrap items-center gap-4 sm:gap-6">
               <a
                 href="https://twitter.com/somnia_network"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm text-theme-secondary hover:text-theme-primary transition-colors"
+                className="text-xs sm:text-sm text-theme-secondary hover:text-theme-primary transition-colors"
               >
                 Twitter
               </a>
@@ -246,19 +246,19 @@ export default function Footer() {
                 href="https://github.com/somnia-network"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm text-theme-secondary hover:text-theme-primary transition-colors"
+                className="text-xs sm:text-sm text-theme-secondary hover:text-theme-primary transition-colors"
               >
                 GitHub
               </a>
             </div>
-            <div className="flex items-center gap-4 text-sm text-theme-secondary">
+            <div className="flex flex-wrap items-center gap-3 sm:gap-4 text-xs sm:text-sm text-theme-secondary">
               <a
                 href="#"
                 className="hover:text-theme-primary transition-colors"
               >
                 Privacy Policy
               </a>
-              <span>•</span>
+              <span className="hidden sm:inline">•</span>
               <a
                 href="#"
                 className="hover:text-theme-primary transition-colors"
