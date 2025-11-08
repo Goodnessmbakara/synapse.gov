@@ -30,6 +30,13 @@ export default function ProposalDetail() {
     args: id ? [BigInt(id)] : undefined,
   });
 
+  // Fetch total voting power from contract
+  const { data: totalVotingPower } = useReadContract({
+    address: GOVERNANCE_CONTRACT_ADDRESS,
+    abi: GovernanceABI,
+    functionName: 'totalVotingPower',
+  });
+
   // Real-time subscriptions
   const votes = useVoteSubscription(id || '');
   const quorumStatus = useQuorumSubscription(id || '');
@@ -57,7 +64,7 @@ export default function ProposalDetail() {
               (proposalData.votesFor > proposalData.votesAgainst ? 'passed' : 'failed') :
               'active',
     createdAt: proposalData.createdAt,
-    totalVotingPower: BigInt(1000000), // TODO: Get from contract
+    totalVotingPower: totalVotingPower ? BigInt(totalVotingPower) : BigInt(1000000), // Get from contract
   } : null;
 
   const handleVoteSuccess = () => {
