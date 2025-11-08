@@ -1,0 +1,32 @@
+<svg width="400" height="100" viewBox="0 0 400 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Icon -->
+  <g transform="translate(20, 20)">
+    <!-- Neural network nodes -->
+    <circle cx="30" cy="30" r="4" fill="#8b5cf6"/>
+    <circle cx="30" cy="15" r="3" fill="#8b5cf6"/>
+    <circle cx="45" cy="22" r="3" fill="#8b5cf6"/>
+    <circle cx="45" cy="38" r="3" fill="#8b5cf6"/>
+    <circle cx="30" cy="45" r="3" fill="#8b5cf6"/>
+    <circle cx="15" cy="38" r="3" fill="#8b5cf6"/>
+    <circle cx="15" cy="22" r="3" fill="#8b5cf6"/>
+    
+    <!-- Connection lines -->
+    <line x1="30" y1="30" x2="30" y2="15" stroke="#8b5cf6" stroke-width="1.5"/>
+    <line x1="30" y1="30" x2="45" y2="22" stroke="#8b5cf6" stroke-width="1.5"/>
+    <line x1="30" y1="30" x2="45" y2="38" stroke="#8b5cf6" stroke-width="1.5"/>
+    <line x1="30" y1="30" x2="30" y2="45" stroke="#8b5cf6" stroke-width="1.5"/>
+    <line x1="30" y1="30" x2="15" y2="38" stroke="#8b5cf6" stroke-width="1.5"/>
+    <line x1="30" y1="30" x2="15" y2="22" stroke="#8b5cf6" stroke-width="1.5"/>
+  </g>
+  
+  <!-- Text -->
+  <text x="80" y="45" font-family="Inter, sans-serif" font-size="32" font-weight="700" fill="#ffffff">
+    SynapseGov
+  </text>
+  
+  <!-- Tagline -->
+  <text x="80" y="65" font-family="Inter, sans-serif" font-size="12" fill="#a3a3a3">
+    Instant governance connections
+  </text>
+</svg>
+

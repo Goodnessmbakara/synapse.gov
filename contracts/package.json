@@ -1,0 +1,20 @@
+{
+  "name": "synapsegov-contracts",
+  "version": "1.0.0",
+  "description": "SynapseGov smart contracts",
+  "main": "index.js",
+  "scripts": {
+    "compile": "solc --version",
+    "deploy": "node scripts/deploy.js"
+  },
+  "keywords": ["governance", "dao", "somnia"],
+  "author": "",
+  "license": "MIT",
+  "packageManager": "pnpm@10.14.0",
+  "dependencies": {
+    "ethers": "^6.0.0"
+  },
+  "devDependencies": {
+    "dotenv": "^16.0.0"
+  }
+}
