@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom';
 import WalletConnect from './WalletConnect';
 import NotificationCenter from './NotificationCenter';
 import ThemeToggle from './ThemeToggle';
+import MobileNav from './MobileNav';
 import Footer from './Footer';
 import type { Notification } from '../types';
 
@@ -15,14 +16,21 @@ export default function Layout({ children, notifications = [], onDismissNotifica
   return (
     <div className="min-h-screen bg-theme-primary flex flex-col">
       <nav className="border-b border-theme-tertiary">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between h-16">
             <Link to="/" className="flex items-center gap-3">
               <img src="/logo.svg" alt="SynapseGov" className="w-8 h-8" />
               <span className="text-xl font-bold text-theme-primary">SynapseGov</span>
             </Link>
             
-            <div className="flex items-center gap-4">
+            {/* Mobile Navigation */}
+            <MobileNav
+              notifications={notifications}
+              onDismissNotification={onDismissNotification}
+            />
+            
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center gap-4">
               <Link
                 to="/proposals"
                 className="text-theme-secondary hover:text-theme-primary transition-colors"

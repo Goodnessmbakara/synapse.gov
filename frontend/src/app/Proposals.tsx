@@ -30,26 +30,26 @@ export default function Proposals() {
 
   return (
     <Layout notifications={notifications} onDismissNotification={dismissNotification}>
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-4xl font-bold mb-4">Proposals</h1>
-          <p className="text-theme-secondary">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+        <div className="flex-1">
+          <h1 className="text-3xl sm:text-4xl font-bold mb-2 sm:mb-4">Proposals</h1>
+          <p className="text-sm sm:text-base text-theme-secondary">
             Real-time governance proposals powered by Somnia Data Streams
           </p>
         </div>
-        <Link to="/proposals/create" className="btn-primary">
+        <Link to="/proposals/create" className="btn-primary w-full sm:w-auto text-center">
           Create Proposal
         </Link>
       </div>
 
       {/* Filters and Sort */}
-      <div className="flex flex-wrap gap-4 mb-6">
-        <div className="flex gap-2">
+      <div className="flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4 mb-6">
+        <div className="flex flex-wrap gap-2">
           {(['all', 'active', 'passed', 'failed'] as const).map((f) => (
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-3 sm:px-4 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors ${
                 filter === f
                   ? 'bg-brand-primary text-white'
                   : 'bg-theme-secondary text-theme-primary hover:bg-theme-tertiary'
@@ -63,7 +63,7 @@ export default function Proposals() {
         <select
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-          className="bg-theme-secondary border border-theme-tertiary rounded-lg px-4 py-2 text-sm text-theme-primary"
+          className="bg-theme-secondary border border-theme-tertiary rounded-lg px-4 py-2 text-xs sm:text-sm text-theme-primary w-full sm:w-auto"
         >
           <option value="newest">Newest First</option>
           <option value="deadline">Deadline Soonest</option>

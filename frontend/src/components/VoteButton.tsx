@@ -35,11 +35,11 @@ export default function VoteButton({ proposal, onVoteSuccess }: VoteButtonProps)
   const isVoting = isPending || isConfirming;
 
   return (
-    <div className="flex gap-4">
+    <div className="flex gap-2 sm:gap-4">
       <button
         onClick={() => handleVote(true)}
         disabled={isVoting || proposal.status !== 'active'}
-        className={`flex-1 py-3 px-6 rounded-lg font-medium transition-colors ${
+        className={`flex-1 min-h-[44px] py-3 px-4 sm:px-6 rounded-lg text-sm sm:text-base font-medium transition-colors ${
           support === true
             ? 'bg-status-success text-white'
             : 'bg-dark-bg-tertiary text-dark-text-primary hover:bg-dark-bg-tertiary/80'
@@ -51,7 +51,7 @@ export default function VoteButton({ proposal, onVoteSuccess }: VoteButtonProps)
       <button
         onClick={() => handleVote(false)}
         disabled={isVoting || proposal.status !== 'active'}
-        className={`flex-1 py-3 px-6 rounded-lg font-medium transition-colors ${
+        className={`flex-1 min-h-[44px] py-3 px-4 sm:px-6 rounded-lg text-sm sm:text-base font-medium transition-colors ${
           support === false
             ? 'bg-status-error text-white'
             : 'bg-dark-bg-tertiary text-dark-text-primary hover:bg-dark-bg-tertiary/80'

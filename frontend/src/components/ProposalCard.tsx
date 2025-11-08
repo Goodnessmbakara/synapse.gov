@@ -34,22 +34,22 @@ export default function ProposalCard({ proposal }: ProposalCardProps) {
       transition={{ duration: 0.3 }}
     >
       <Link to={`/proposals/${proposal.id}`}>
-        <div className="card hover:border-brand-primary/50 transition-colors cursor-pointer">
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex-1">
-              <h3 className="text-xl font-semibold mb-2">{proposal.title}</h3>
+        <div className="card hover:border-brand-primary/50 transition-colors cursor-pointer p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-start justify-between mb-4 gap-3">
+            <div className="flex-1 min-w-0">
+              <h3 className="text-lg sm:text-xl font-semibold mb-2 break-words">{proposal.title}</h3>
               <p className="text-dark-text-secondary text-sm line-clamp-2">
                 {proposal.description}
               </p>
             </div>
-            <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getStatusColor()}`}>
+            <span className={`px-3 py-1 rounded-full text-xs font-medium border whitespace-nowrap ${getStatusColor()}`}>
               {proposal.status}
             </span>
           </div>
 
-          <div className="flex items-center gap-4 text-sm text-dark-text-secondary mb-4">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-dark-text-secondary mb-4">
             <span>By {truncateAddress(proposal.proposer)}</span>
-            <span>•</span>
+            <span className="hidden sm:inline">•</span>
             <span>{timeUntil(proposal.deadline)} left</span>
           </div>
 

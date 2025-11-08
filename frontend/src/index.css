@@ -24,11 +24,25 @@
   html {
     background-color: var(--bg-primary);
     color: var(--text-primary);
+    overflow-x: hidden;
   }
   
   body {
     background-color: var(--bg-primary);
     color: var(--text-primary);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  /* Prevent horizontal scroll */
+  * {
+    max-width: 100%;
+  }
+  
+  /* Touch-friendly tap targets */
+  button, a {
+    -webkit-tap-highlight-color: transparent;
   }
 }
 
@@ -80,7 +94,27 @@
   .card {
     background-color: var(--bg-secondary);
     border-color: var(--bg-tertiary);
-    @apply border rounded-lg p-6;
+    @apply border rounded-lg p-4 sm:p-6;
+  }
+  
+  /* Mobile-specific utilities */
+  @media (max-width: 640px) {
+    /* Ensure readable text on mobile */
+    body {
+      font-size: 16px;
+      line-height: 1.5;
+    }
+    
+    /* Prevent text overflow */
+    h1, h2, h3, h4, h5, h6 {
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
+    
+    /* Touch-friendly inputs */
+    input, textarea, select {
+      font-size: 16px; /* Prevents zoom on iOS */
+    }
   }
 }
 

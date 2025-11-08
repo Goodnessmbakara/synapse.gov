@@ -17,14 +17,14 @@ export default function Home() {
           transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
-          <h1 className="text-5xl md:text-6xl font-bold mb-4">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
             Real-Time DAO Governance
           </h1>
-          <p className="text-xl text-dark-text-secondary mb-8 max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg md:text-xl text-dark-text-secondary mb-8 max-w-2xl mx-auto px-4">
             Instant proposal appearance, live vote tracking, and real-time quorum visualization.
             Powered by Somnia Data Streams.
           </p>
-          <div className="flex gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row flex-wrap gap-4 justify-center px-4">
             <Link to="/proposals" className="btn-primary">
               View Proposals
             </Link>
@@ -47,19 +47,19 @@ export default function Home() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="relative mt-16"
+          className="relative mt-16 px-4 overflow-x-hidden"
         >
           <motion.div
             whileHover={{ scale: 1.02 }}
             transition={{ type: 'spring', stiffness: 300 }}
-            className="bg-dark-bg-secondary border border-dark-bg-tertiary rounded-xl p-8 shadow-2xl"
+            className="bg-dark-bg-secondary border border-dark-bg-tertiary rounded-xl p-4 sm:p-6 md:p-8 shadow-2xl"
           >
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
               <div className="flex items-center gap-3">
                 <img src="/logo.svg" alt="SynapseGov" className="w-6 h-6" />
                 <span className="font-semibold">SynapseGov</span>
               </div>
-              <div className="flex gap-2 text-sm">
+              <div className="flex flex-wrap gap-2 text-sm">
                 <button className="px-3 py-1 rounded bg-dark-bg-tertiary">Home</button>
                 <button className="px-3 py-1 rounded bg-brand-primary text-white">Proposals</button>
                 <button className="px-3 py-1 rounded bg-dark-bg-tertiary">Activity</button>
@@ -73,9 +73,9 @@ export default function Home() {
                   <h3 className="font-semibold">Proposal #1: Upgrade Protocol</h3>
                   <span className="text-xs px-2 py-1 rounded bg-status-warning/20 text-status-warning">Active</span>
                 </div>
-                <div className="flex items-center gap-4 text-sm text-dark-text-secondary mb-3">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-sm text-dark-text-secondary mb-3">
                   <span>By 0x1234...5678</span>
-                  <span>•</span>
+                  <span className="hidden sm:inline">•</span>
                   <span>2d 5h left</span>
                 </div>
                 <div className="space-y-2">
@@ -103,9 +103,9 @@ export default function Home() {
                   <h3 className="font-semibold">Proposal #2: Treasury Allocation</h3>
                   <span className="text-xs px-2 py-1 rounded bg-status-success/20 text-status-success">Passed</span>
                 </div>
-                <div className="flex items-center gap-4 text-sm text-dark-text-secondary">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-sm text-dark-text-secondary">
                   <span>By 0xabcd...efgh</span>
-                  <span>•</span>
+                  <span className="hidden sm:inline">•</span>
                   <span>5d ago</span>
                 </div>
               </div>
@@ -125,7 +125,7 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="grid md:grid-cols-3 gap-6 mb-16">
+      <section className="grid md:grid-cols-3 gap-4 sm:gap-6 mb-16 px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -167,11 +167,11 @@ export default function Home() {
       </section>
 
       {/* Create Proposal Section - Right Aligned */}
-      <section className="flex justify-end">
-        <div className="w-full md:w-auto">
+      <section className="flex justify-center sm:justify-end px-4">
+        <div className="w-full sm:w-auto">
           <Link
             to="/proposals/create"
-            className="inline-flex items-center gap-2 px-6 py-3 bg-brand-primary hover:bg-brand-primary/90 text-white rounded-lg font-semibold transition-colors shadow-lg hover:shadow-xl"
+            className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 bg-brand-primary hover:bg-brand-primary/90 text-white rounded-lg font-semibold transition-colors shadow-lg hover:shadow-xl"
           >
             <svg
               className="w-5 h-5"

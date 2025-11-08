@@ -91,25 +91,25 @@ export default function ProposalDetail() {
         {/* Back Button */}
         <Link
           to="/proposals"
-          className="text-brand-primary hover:underline mb-6 inline-block"
+          className="text-brand-primary hover:underline mb-4 sm:mb-6 inline-block text-sm sm:text-base"
         >
           ← Back to Proposals
         </Link>
 
         {/* Proposal Header */}
-        <div className="card mb-6">
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex-1">
-              <h1 className="text-3xl font-bold mb-2">{proposal.title}</h1>
-              <div className="flex items-center gap-4 text-sm text-dark-text-secondary mb-4">
+        <div className="card mb-6 p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-start justify-between mb-4 gap-4">
+            <div className="flex-1 min-w-0">
+              <h1 className="text-2xl sm:text-3xl font-bold mb-2 break-words">{proposal.title}</h1>
+              <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-dark-text-secondary mb-4">
                 <span>By {truncateAddress(proposal.proposer)}</span>
-                <span>•</span>
+                <span className="hidden sm:inline">•</span>
                 <span>Created {formatTimestamp(proposal.createdAt)}</span>
-                <span>•</span>
+                <span className="hidden sm:inline">•</span>
                 <span>{timeUntil(proposal.deadline)} left</span>
               </div>
             </div>
-            <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+            <span className={`px-3 py-1 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap ${
               proposal.status === 'passed' ? 'bg-status-success/20 text-status-success' :
               proposal.status === 'failed' ? 'bg-status-error/20 text-status-error' :
               proposal.status === 'executed' ? 'bg-brand-primary/20 text-brand-primary' :
@@ -128,23 +128,23 @@ export default function ProposalDetail() {
 
         {/* Voting Section */}
         {proposal.status === 'active' && (
-          <div className="card mb-6">
-            <h2 className="text-xl font-semibold mb-4">Cast Your Vote</h2>
+          <div className="card mb-6 p-4 sm:p-6">
+            <h2 className="text-lg sm:text-xl font-semibold mb-4">Cast Your Vote</h2>
             <VoteButton proposal={proposal} onVoteSuccess={handleVoteSuccess} />
           </div>
         )}
 
         {/* Quorum Indicator */}
         {effectiveQuorum && (
-          <div className="card mb-6">
+          <div className="card mb-6 p-4 sm:p-6">
             <QuorumIndicator quorum={effectiveQuorum} />
           </div>
         )}
 
         {/* Vote Breakdown */}
-        <div className="card mb-6">
-          <h2 className="text-xl font-semibold mb-4">Vote Breakdown</h2>
-          <div className="grid md:grid-cols-2 gap-6 mb-6">
+        <div className="card mb-6 p-4 sm:p-6">
+          <h2 className="text-lg sm:text-xl font-semibold mb-4">Vote Breakdown</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-6">
             <div>
               <div className="text-2xl font-bold text-status-success mb-2">
                 {proposal.votesFor.toString()}
@@ -161,22 +161,22 @@ export default function ProposalDetail() {
 
           {/* Recent Votes */}
           {votes.length > 0 && (
-            <div>
+            <div className="overflow-x-auto">
               <h3 className="text-sm font-semibold mb-3">Recent Votes</h3>
-              <div className="space-y-2">
+              <div className="space-y-2 min-w-0">
                 {votes.slice(0, 10).map((vote, index) => (
                   <div
                     key={index}
-                    className="flex items-center justify-between text-sm py-2 border-b border-dark-bg-tertiary last:border-0"
+                    className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 text-xs sm:text-sm py-2 border-b border-dark-bg-tertiary last:border-0"
                   >
-                    <span className="font-mono text-xs">
+                    <span className="font-mono text-xs break-all sm:break-normal">
                       {truncateAddress(vote.voter)}
                     </span>
-                    <div className="flex items-center gap-4">
-                      <span className={vote.support ? 'text-status-success' : 'text-status-error'}>
+                    <div className="flex items-center gap-2 sm:gap-4">
+                      <span className={`whitespace-nowrap ${vote.support ? 'text-status-success' : 'text-status-error'}`}>
                         {vote.support ? 'For' : 'Against'}
                       </span>
-                      <span className="text-dark-text-secondary text-xs">
+                      <span className="text-dark-text-secondary text-xs whitespace-nowrap">
                         {formatTimestamp(vote.timestamp)}
                       </span>
                     </div>

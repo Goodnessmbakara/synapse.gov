@@ -86,7 +86,7 @@ export default function CreateProposal() {
   return (
     <Layout notifications={notifications} onDismissNotification={dismissNotification}>
       <div className="max-w-2xl mx-auto">
-        <h1 className="text-3xl font-bold mb-6 text-theme-primary">Create Proposal</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-theme-primary">Create Proposal</h1>
         
         {!isConnected ? (
           <div className="card text-center py-12">
@@ -151,18 +151,18 @@ export default function CreateProposal() {
               </p>
             </div>
 
-            <div className="flex gap-4">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <button
                 type="button"
                 onClick={() => navigate('/proposals')}
-                className="btn-secondary flex-1"
+                className="btn-secondary w-full sm:w-auto sm:flex-1"
                 disabled={isLoading}
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="btn-primary flex-1"
+                className="btn-primary w-full sm:w-auto sm:flex-1"
                 disabled={isLoading}
               >
                 {isLoading ? 'Creating...' : 'Create Proposal'}
