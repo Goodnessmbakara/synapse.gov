@@ -3,8 +3,9 @@
 // https://docs.somnia.network/somnia-data-streams/getting-started/sdk-methods-guide
 // This file contains the logic to publish contract events to SDS
 
-import { SDK } from '@somnia-chain/streams';
-import { getSchemaIds } from './sds';
+import { SDK, SchemaEncoder } from '@somnia-chain/streams';
+import { getSchemaIds, encodeProposal, encodeVote, QuorumEventSchemaString } from './sds';
+import { toHex } from 'viem';
 import type { Proposal } from '../types';
 
 /**
@@ -51,11 +52,18 @@ export async function setupPublishers(
       void _proposal;
 
       // Publish to SDS using official SDK method
-      // await sdk.streams.set([{
-      //   id: toHex(proposalId.toString(), { size: 32 }),
-      //   schemaId: proposalSchemaId as `0x${string}`,
-      //   data: encodeProposal(_proposal),
-      // }]);
+      if (proposalSchemaId) {
+        try {
+          await sdk.streams.publishData(
+            proposalSchemaId,
+            toHex(proposalId.toString(), { size: 32 }),
+            encodeProposal(_proposal),
+            false // Don't register schema (already registered)
+          );
+        } catch (error) {
+          console.error('Failed to publish proposal to SDS:', error);
+        }
+      }
 
       // Also publish to activity feed
       await publishActivityEvent(sdk, {
@@ -77,22 +85,28 @@ export async function setupPublishers(
     votingPower: bigint
   ) => {
     try {
-      // Vote data fetched but not used until SDS SDK is configured
-      void {
-        proposalId: proposalId.toString(),
-        voter: voter,
-        support: support,
-        votingPower: votingPower,
-        timestamp: BigInt(Math.floor(Date.now() / 1000)),
-        txHash: '',
-      };
-
-      // TODO: Update with actual SDS SDK API when available
-      // await sdk.streams.set([{
-      //   id: toHex(`${proposalId}-${voter}`, { size: 32 }),
-      //   schemaId: voteSchemaId,
-      //   data: encodeVote(vote),
-      // }]);
+      // Publish vote to SDS
+      if (voteSchemaId) {
+        try {
+          const vote = {
+            proposalId: proposalId.toString(),
+            voter: voter,
+            support: support,
+            votingPower: votingPower,
+            timestamp: BigInt(Math.floor(Date.now() / 1000)),
+            txHash: '' as `0x${string}`,
+          };
+          
+          await sdk.streams.publishData(
+            voteSchemaId,
+            toHex(`${proposalId}-${voter}`, { size: 32 }),
+            encodeVote(vote),
+            false
+          );
+        } catch (error) {
+          console.error('Failed to publish vote to SDS:', error);
+        }
+      }
 
       // Update proposal vote counts
       await updateProposalVotes(sdk, contract, proposalId);
@@ -155,7 +169,7 @@ export async function setupPublishers(
   });
 }
 
-async function updateProposalVotes(_sdk: SDK, contract: any, proposalId: bigint) {
+async function updateProposalVotes(sdk: SDK, contract: any, proposalId: bigint) {
   try {
     const proposalData = await contract.getProposal(proposalId);
     const quorumThreshold = await contract.quorumThreshold();
@@ -164,9 +178,7 @@ async function updateProposalVotes(_sdk: SDK, contract: any, proposalId: bigint)
     const totalVotes = proposalData.votesFor + proposalData.votesAgainst;
     const currentQuorum = (totalVotes * 100n) / totalVotingPower;
 
-    // Proposal data fetched but not used until SDS SDK is configured
-    // Will be used when SDS SDK is properly configured
-    const _proposal: Proposal = {
+    const proposal: Proposal = {
       id: proposalId.toString(),
       title: proposalData.title,
       description: proposalData.description,
@@ -183,38 +195,54 @@ async function updateProposalVotes(_sdk: SDK, contract: any, proposalId: bigint)
       createdAt: proposalData.createdAt,
       totalVotingPower: BigInt(totalVotingPower),
     };
-    void _proposal;
 
-    // TODO: Update with actual SDS SDK API when available
-    // const { proposalSchemaId } = getSchemaIds();
-    // await sdk.streams.set([{
-    //   id: toHex(proposalId.toString(), { size: 32 }),
-    //   schemaId: proposalSchemaId!,
-    //   data: encodeProposal(proposal),
-    // }]);
+    // Update proposal in SDS
+    const { proposalSchemaId } = getSchemaIds();
+    if (proposalSchemaId) {
+      try {
+        await sdk.streams.publishData(
+          proposalSchemaId,
+          toHex(proposalId.toString(), { size: 32 }),
+          encodeProposal(proposal),
+          false
+        );
+      } catch (error) {
+        console.error('Failed to update proposal in SDS:', error);
+      }
+    }
   } catch (error) {
     console.error('Failed to update proposal votes:', error);
   }
 }
 
-async function checkQuorumStatus(_sdk: SDK, contract: any, proposalId: bigint) {
+async function checkQuorumStatus(sdk: SDK, contract: any, proposalId: bigint) {
   try {
     const quorumReached = await contract.checkQuorum(proposalId);
     if (quorumReached) {
-      // TODO: Update with actual SDS SDK API when available
-      // const { current, required } = await contract.getQuorum(proposalId);
-      // const { quorumEventSchemaId } = getSchemaIds();
-      // await sdk.streams.set([{
-      //   id: toHex(`quorum-${proposalId}`, { size: 32 }),
-      //   schemaId: quorumEventSchemaId!,
-      //   data: new TextEncoder().encode(JSON.stringify({
-      //     proposalId: proposalId.toString(),
-      //     eventType: 'reached',
-      //     currentQuorum: current.toString(),
-      //     requiredQuorum: required.toString(),
-      //     timestamp: Math.floor(Date.now() / 1000),
-      //   })),
-      // }]);
+      const { current, required } = await contract.getQuorum(proposalId);
+      const { quorumEventSchemaId } = getSchemaIds();
+      
+      if (quorumEventSchemaId) {
+        try {
+          const encoder = new SchemaEncoder(QuorumEventSchemaString);
+          const encoded = encoder.encodeData([
+            { name: 'proposalId', type: 'bytes32', value: toHex(proposalId.toString(), { size: 32 }) },
+            { name: 'eventType', type: 'string', value: 'reached' },
+            { name: 'currentQuorum', type: 'uint256', value: BigInt(current) },
+            { name: 'requiredQuorum', type: 'uint256', value: BigInt(required) },
+            { name: 'timestamp', type: 'uint256', value: BigInt(Math.floor(Date.now() / 1000)) },
+          ]);
+          
+          await sdk.streams.publishData(
+            quorumEventSchemaId,
+            toHex(`quorum-${proposalId}`, { size: 32 }),
+            encoded,
+            false
+          );
+        } catch (error) {
+          console.error('Failed to publish quorum event to SDS:', error);
+        }
+      }
     }
   } catch (error) {
     console.error('Failed to check quorum status:', error);

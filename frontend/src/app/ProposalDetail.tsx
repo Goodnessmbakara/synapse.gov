@@ -22,9 +22,24 @@ export default function ProposalDetail() {
     args: id ? [BigInt(id)] : undefined,
   });
 
+  // Fetch quorum from contract
+  const { data: quorumData } = useReadContract({
+    address: GOVERNANCE_CONTRACT_ADDRESS,
+    abi: GovernanceABI,
+    functionName: 'getQuorum',
+    args: id ? [BigInt(id)] : undefined,
+  });
+
   // Real-time subscriptions
   const votes = useVoteSubscription(id || '');
   const quorumStatus = useQuorumSubscription(id || '');
+
+  // Use contract quorum data as fallback if subscription not available
+  const effectiveQuorum = quorumStatus || (quorumData ? {
+    current: BigInt(quorumData[0]),
+    required: BigInt(quorumData[1]),
+    reached: quorumData[0] >= quorumData[1]
+  } : null);
 
   // Convert contract data to Proposal type
   const proposal: Proposal | null = proposalData ? {
@@ -34,8 +49,8 @@ export default function ProposalDetail() {
     proposer: proposalData.proposer,
     votesFor: proposalData.votesFor,
     votesAgainst: proposalData.votesAgainst,
-    quorumThreshold: BigInt(50), // TODO: Get from contract
-    currentQuorum: quorumStatus ? quorumStatus.current : BigInt(0),
+    quorumThreshold: quorumData ? BigInt(quorumData[1]) : BigInt(50), // Get from contract
+    currentQuorum: effectiveQuorum ? effectiveQuorum.current : BigInt(0),
     deadline: proposalData.deadline,
     status: proposalData.executed ? 'executed' : 
             Number(proposalData.deadline) < Date.now() / 1000 ? 
@@ -113,9 +128,9 @@ export default function ProposalDetail() {
         )}
 
         {/* Quorum Indicator */}
-        {quorumStatus && (
+        {effectiveQuorum && (
           <div className="card mb-6">
-            <QuorumIndicator quorum={quorumStatus} />
+            <QuorumIndicator quorum={effectiveQuorum} />
           </div>
         )}
 

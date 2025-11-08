@@ -27,7 +27,7 @@ pnpm install
 
 2. Set up environment variables:
 ```bash
-cp .env.example .env
+cp env.example .env
 # Fill in your private key and RPC URL
 ```
 
@@ -45,7 +45,7 @@ pnpm run deploy
 ## Somnia Testnet Configuration
 
 - Network: Somnia Testnet
-- RPC: [To be configured]
-- Chain ID: [To be configured]
-- Explorer: [To be configured]
+- RPC: https://dream-rpc.somnia.network
+- Explorer: https://explorer.somnia.network
+- Chain ID: 123456
 

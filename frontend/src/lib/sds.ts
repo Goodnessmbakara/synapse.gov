@@ -2,9 +2,9 @@
 // Based on official Somnia Data Streams SDK documentation:
 // https://docs.somnia.network/somnia-data-streams/getting-started/sdk-methods-guide
 
-import { SDK } from '@somnia-chain/streams';
+import { SDK, SchemaEncoder, zeroBytes32 } from '@somnia-chain/streams';
 import { createPublicClient, http } from 'viem';
-import { defineChain } from 'viem';
+import { defineChain, toHex } from 'viem';
 import type { Proposal, Vote } from '../types';
 
 // Define Somnia Testnet for SDS initialization
@@ -71,11 +71,53 @@ export async function initializeSDK(publicClient: any, walletClient?: any) {
 }
 
 export async function initializeSchemas(sdk: SDK) {
-  // Compute schema IDs using the SDK
-  proposalSchemaId = (await sdk.streams.computeSchemaId(ProposalSchemaString)) as `0x${string}` || null;
-  voteSchemaId = (await sdk.streams.computeSchemaId(VoteSchemaString)) as `0x${string}` || null;
-  quorumEventSchemaId = (await sdk.streams.computeSchemaId(QuorumEventSchemaString)) as `0x${string}` || null;
-  activityEventSchemaId = (await sdk.streams.computeSchemaId(ActivityEventSchemaString)) as `0x${string}` || null;
+  try {
+    // Register schemas on-chain (one-time operation)
+    // If already registered, this will return existing schema IDs
+    // Use zeroBytes32 as parent (cast to Hex type)
+    const parentSchema = zeroBytes32 as `0x${string}`;
+    
+    proposalSchemaId = (await sdk.streams.registerSchema(
+      ProposalSchemaString,
+      parentSchema
+    )) || null;
+    
+    voteSchemaId = (await sdk.streams.registerSchema(
+      VoteSchemaString,
+      parentSchema
+    )) || null;
+    
+    quorumEventSchemaId = (await sdk.streams.registerSchema(
+      QuorumEventSchemaString,
+      parentSchema
+    )) || null;
+    
+    activityEventSchemaId = (await sdk.streams.registerSchema(
+      ActivityEventSchemaString,
+      parentSchema
+    )) || null;
+    
+    // Fallback: compute schema IDs if registration fails
+    if (!proposalSchemaId) {
+      proposalSchemaId = (await sdk.streams.computeSchemaId(ProposalSchemaString)) || null;
+    }
+    if (!voteSchemaId) {
+      voteSchemaId = (await sdk.streams.computeSchemaId(VoteSchemaString)) || null;
+    }
+    if (!quorumEventSchemaId) {
+      quorumEventSchemaId = (await sdk.streams.computeSchemaId(QuorumEventSchemaString)) || null;
+    }
+    if (!activityEventSchemaId) {
+      activityEventSchemaId = (await sdk.streams.computeSchemaId(ActivityEventSchemaString)) || null;
+    }
+  } catch (error) {
+    console.warn('Schema registration failed, using computed IDs:', error);
+    // Fallback to computed IDs
+    proposalSchemaId = (await sdk.streams.computeSchemaId(ProposalSchemaString)) || null;
+    voteSchemaId = (await sdk.streams.computeSchemaId(VoteSchemaString)) || null;
+    quorumEventSchemaId = (await sdk.streams.computeSchemaId(QuorumEventSchemaString)) || null;
+    activityEventSchemaId = (await sdk.streams.computeSchemaId(ActivityEventSchemaString)) || null;
+  }
   
   return {
     proposalSchemaId,
@@ -98,32 +140,85 @@ export function getSDKInstance() {
   return sdkInstance;
 }
 
-// Encoding/Decoding helpers
-// Note: SDS uses Hex strings for data, not Uint8Array
-// Per docs: data should be encoded using SchemaEncoder or similar
+// Encoding/Decoding helpers using SchemaEncoder
 export function encodeProposal(proposal: Proposal): `0x${string}` {
-  // TODO: Implement proper encoding using SDS SDK SchemaEncoder
-  // For now, JSON encoding as placeholder
-  const json = JSON.stringify(proposal);
-  return `0x${Buffer.from(json).toString('hex')}` as `0x${string}`;
+  try {
+    const encoder = new SchemaEncoder(ProposalSchemaString);
+    return encoder.encodeData([
+      { name: 'id', type: 'bytes32', value: toHex(proposal.id, { size: 32 }) },
+      { name: 'title', type: 'string', value: proposal.title },
+      { name: 'description', type: 'string', value: proposal.description },
+      { name: 'proposer', type: 'address', value: proposal.proposer },
+      { name: 'votesFor', type: 'uint256', value: proposal.votesFor },
+      { name: 'votesAgainst', type: 'uint256', value: proposal.votesAgainst },
+      { name: 'quorumThreshold', type: 'uint256', value: proposal.quorumThreshold },
+      { name: 'currentQuorum', type: 'uint256', value: proposal.currentQuorum },
+      { name: 'deadline', type: 'uint256', value: proposal.deadline },
+      { name: 'status', type: 'string', value: proposal.status },
+      { name: 'createdAt', type: 'uint256', value: proposal.createdAt },
+      { name: 'totalVotingPower', type: 'uint256', value: proposal.totalVotingPower },
+    ]);
+  } catch (error) {
+    console.warn('Schema encoding failed, using JSON fallback:', error);
+    // Fallback to JSON encoding
+    const json = JSON.stringify(proposal);
+    return `0x${Buffer.from(json).toString('hex')}` as `0x${string}`;
+  }
 }
 
 export function encodeVote(vote: Vote): `0x${string}` {
-  // TODO: Implement proper encoding using SDS SDK SchemaEncoder
-  const json = JSON.stringify(vote);
-  return `0x${Buffer.from(json).toString('hex')}` as `0x${string}`;
+  try {
+    const encoder = new SchemaEncoder(VoteSchemaString);
+    return encoder.encodeData([
+      { name: 'proposalId', type: 'bytes32', value: toHex(vote.proposalId, { size: 32 }) },
+      { name: 'voter', type: 'address', value: vote.voter },
+      { name: 'support', type: 'bool', value: vote.support },
+      { name: 'votingPower', type: 'uint256', value: vote.votingPower },
+      { name: 'timestamp', type: 'uint256', value: vote.timestamp },
+      { name: 'txHash', type: 'bytes32', value: vote.txHash || zeroBytes32 },
+    ]);
+  } catch (error) {
+    console.warn('Schema encoding failed, using JSON fallback:', error);
+    // Fallback to JSON encoding
+    const json = JSON.stringify(vote);
+    return `0x${Buffer.from(json).toString('hex')}` as `0x${string}`;
+  }
 }
 
 export function decodeProposal(data: `0x${string}`): Proposal {
-  // TODO: Implement proper decoding using SDS SDK
-  const json = Buffer.from(data.slice(2), 'hex').toString();
-  return JSON.parse(json) as Proposal;
+  try {
+    const encoder = new SchemaEncoder(ProposalSchemaString);
+    const decoded = encoder.decodeData(data);
+    // Convert decoded items back to Proposal type
+    const result: any = {};
+    decoded.forEach(item => {
+      result[item.name] = item.value.value;
+    });
+    return result as Proposal;
+  } catch (error) {
+    console.warn('Schema decoding failed, using JSON fallback:', error);
+    // Fallback to JSON decoding
+    const json = Buffer.from(data.slice(2), 'hex').toString();
+    return JSON.parse(json) as Proposal;
+  }
 }
 
 export function decodeVote(data: `0x${string}`): Vote {
-  // TODO: Implement proper decoding using SDS SDK
-  const json = Buffer.from(data.slice(2), 'hex').toString();
-  return JSON.parse(json) as Vote;
+  try {
+    const encoder = new SchemaEncoder(VoteSchemaString);
+    const decoded = encoder.decodeData(data);
+    // Convert decoded items back to Vote type
+    const result: any = {};
+    decoded.forEach(item => {
+      result[item.name] = item.value.value;
+    });
+    return result as Vote;
+  } catch (error) {
+    console.warn('Schema decoding failed, using JSON fallback:', error);
+    // Fallback to JSON decoding
+    const json = Buffer.from(data.slice(2), 'hex').toString();
+    return JSON.parse(json) as Vote;
+  }
 }
 
 // SDS Connection Manager

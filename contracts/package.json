@@ -4,8 +4,11 @@
   "description": "SynapseGov smart contracts",
   "main": "index.js",
   "scripts": {
-    "compile": "solc --version",
-    "deploy": "node scripts/deploy.js"
+    "compile": "forge build",
+    "deploy": "node scripts/deploy.js",
+    "interact": "node scripts/interact.js",
+    "build": "forge build",
+    "test": "forge test"
   },
   "keywords": ["governance", "dao", "somnia"],
   "author": "",

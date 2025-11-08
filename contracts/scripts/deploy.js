@@ -1,10 +1,13 @@
 const { ethers } = require('ethers');
+const fs = require('fs');
+const path = require('path');
 require('dotenv').config();
 
 async function main() {
   // Load environment variables
   const privateKey = process.env.PRIVATE_KEY;
-  const rpcUrl = process.env.RPC_URL || 'https://rpc.somnia.network';
+  const rpcUrl = process.env.RPC_URL || 'https://dream-rpc.somnia.network';
+  const explorerUrl = process.env.EXPLORER_URL || 'https://explorer.somnia.network';
   
   if (!privateKey) {
     throw new Error('PRIVATE_KEY not set in .env file');
@@ -14,42 +17,91 @@ async function main() {
   const provider = new ethers.JsonRpcProvider(rpcUrl);
   const wallet = new ethers.Wallet(privateKey, provider);
   
-  console.log('Deploying Governance contract...');
-  console.log('Deployer address:', wallet.address);
+  console.log('🚀 Deploying Governance contract...');
+  console.log('📡 RPC URL:', rpcUrl);
+  console.log('👤 Deployer address:', wallet.address);
   
-  // Get contract bytecode and ABI
-  // Note: You'll need to compile the contract first and load the artifacts
-  // For now, this is a template
+  // Check balance
+  const balance = await provider.getBalance(wallet.address);
+  console.log('💰 Balance:', ethers.formatEther(balance), 'SOM');
   
-  // Configuration
-  const quorumThreshold = 50; // 50%
-  const votingPeriod = 7 * 24 * 60 * 60; // 7 days
+  if (balance === 0n) {
+    console.warn('⚠️  Warning: Account has zero balance. You may need testnet tokens.');
+  }
   
-  // TODO: Load compiled contract
-  // const GovernanceFactory = new ethers.ContractFactory(
-  //   GovernanceABI,
-  //   GovernanceBytecode,
-  //   wallet
-  // );
+  // Load compiled contract artifacts from Foundry
+  const artifactPath = path.join(__dirname, '../out/Governance.sol/Governance.json');
   
-  // const governance = await GovernanceFactory.deploy(
-  //   quorumThreshold,
-  //   votingPeriod
-  // );
+  if (!fs.existsSync(artifactPath)) {
+    throw new Error(
+      `Contract artifact not found at ${artifactPath}\n` +
+      'Please compile the contract first: forge build'
+    );
+  }
   
-  // await governance.waitForDeployment();
+  const artifact = JSON.parse(fs.readFileSync(artifactPath, 'utf8'));
+  const bytecode = artifact.bytecode.object;
+  const abi = artifact.abi;
   
-  // const address = await governance.getAddress();
-  // console.log('Governance deployed to:', address);
-  // console.log('Explorer:', `${process.env.EXPLORER_URL}/address/${address}`);
+  console.log('✅ Contract artifact loaded');
   
-  console.log('\nDeployment script template ready.');
-  console.log('Compile the contract first, then update this script with the ABI and bytecode.');
+  // Configuration from environment or defaults
+  const quorumThreshold = parseInt(process.env.QUORUM_THRESHOLD || '50'); // 50%
+  const votingPeriod = parseInt(process.env.VOTING_PERIOD || '604800'); // 7 days in seconds
+  
+  console.log('⚙️  Configuration:');
+  console.log('   Quorum Threshold:', quorumThreshold + '%');
+  console.log('   Voting Period:', votingPeriod, 'seconds (' + (votingPeriod / 86400) + ' days)');
+  
+  // Create contract factory
+  const GovernanceFactory = new ethers.ContractFactory(abi, bytecode, wallet);
+  
+  console.log('\n📤 Deploying contract...');
+  
+  // Deploy contract
+  const governance = await GovernanceFactory.deploy(
+    quorumThreshold,
+    votingPeriod
+  );
+  
+  console.log('⏳ Waiting for deployment transaction...');
+  console.log('   Transaction hash:', governance.deploymentTransaction()?.hash);
+  
+  await governance.waitForDeployment();
+  
+  const address = await governance.getAddress();
+  
+  console.log('\n✅ Governance contract deployed successfully!');
+  console.log('📍 Contract address:', address);
+  console.log('🔍 Explorer:', `${explorerUrl}/address/${address}`);
+  
+  // Save deployment info
+  const deploymentInfo = {
+    address,
+    network: 'Somnia Testnet',
+    rpcUrl,
+    explorerUrl: `${explorerUrl}/address/${address}`,
+    deployer: wallet.address,
+    quorumThreshold,
+    votingPeriod,
+    deployedAt: new Date().toISOString(),
+    transactionHash: governance.deploymentTransaction()?.hash
+  };
+  
+  const deploymentPath = path.join(__dirname, '../deployment.json');
+  fs.writeFileSync(deploymentPath, JSON.stringify(deploymentInfo, null, 2));
+  console.log('💾 Deployment info saved to:', deploymentPath);
+  
+  console.log('\n📝 Next steps:');
+  console.log('1. Update frontend/.env with: VITE_CONTRACT_ADDRESS=' + address);
+  console.log('2. Verify contract on explorer');
+  console.log('3. Test contract interaction');
 }
 
 main()
   .then(() => process.exit(0))
   .catch((error) => {
+    console.error('\n❌ Deployment failed:');
     console.error(error);
     process.exit(1);
   });
