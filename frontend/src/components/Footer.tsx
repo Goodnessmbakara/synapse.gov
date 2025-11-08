@@ -191,7 +191,7 @@ export default function Footer() {
           </div>
 
           {/* Community */}
-          <div className="col-span-2 sm:col-span-2 md:col-span-1">
+          <div>
             <h3 className="text-xs sm:text-sm font-semibold text-theme-primary mb-3 sm:mb-4">
               Community
             </h3>
