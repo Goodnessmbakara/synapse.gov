@@ -42,12 +42,12 @@ export default function Home() {
         {/* Dynamic Hero Images - Tally-inspired bent effect */}
         <DynamicHeroImages />
 
-        {/* Interactive Dashboard Preview */}
+        {/* Interactive Dashboard Preview - Hidden on mobile, shown on tablet+ */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2 }}
-          className="relative mt-16 px-4 overflow-x-hidden"
+          className="relative hidden md:block mt-8 md:mt-16 px-4 overflow-x-hidden"
         >
           <motion.div
             whileHover={{ scale: 1.02 }}
@@ -167,11 +167,11 @@ export default function Home() {
       </section>
 
       {/* Create Proposal Section - Right Aligned */}
-      <section className="flex justify-center sm:justify-end px-4">
+      <section className="flex justify-center sm:justify-end px-4 mb-8 sm:mb-0">
         <div className="w-full sm:w-auto">
           <Link
             to="/proposals/create"
-            className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 bg-brand-primary hover:bg-brand-primary/90 text-white rounded-lg font-semibold transition-colors shadow-lg hover:shadow-xl"
+            className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-6 py-3 min-h-[44px] bg-brand-primary hover:bg-brand-primary/90 text-white rounded-lg font-semibold transition-colors shadow-lg hover:shadow-xl"
           >
             <svg
               className="w-5 h-5"

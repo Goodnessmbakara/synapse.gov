@@ -97,6 +97,25 @@
     @apply border rounded-lg p-4 sm:p-6;
   }
   
+  /* Hide scrollbar for horizontal scroll */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Snap scrolling for mobile cards */
+  .snap-x {
+    scroll-snap-type: x mandatory;
+  }
+  
+  .snap-start {
+    scroll-snap-align: start;
+  }
+  
   /* Mobile-specific utilities */
   @media (max-width: 640px) {
     /* Ensure readable text on mobile */
