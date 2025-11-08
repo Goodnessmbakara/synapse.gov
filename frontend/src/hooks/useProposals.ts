@@ -168,7 +168,7 @@ export function useProposalSubscription() {
 
           if (!proposalData) return;
 
-          const [quorumCurrent, quorumRequired] = await publicClient.readContract({
+          const [quorumCurrent] = await publicClient.readContract({
             address: GOVERNANCE_CONTRACT_ADDRESS,
             abi: GovernanceABI,
             functionName: 'getQuorum',
