@@ -1,10 +1,11 @@
 // Contract ABI and interaction utilities
-// Updated to match deployed contract: 0xDdc49E1bA14E64c824B7eDF8924572618fe100AF
+// OPTIMIZED CONTRACT: Title and description are stored in ProposalCreated events, not in storage
+// Use getProposalMetadata() from './proposal-metadata' to fetch title/description from events
 
 import { Address } from 'viem';
 
 export const GOVERNANCE_CONTRACT_ADDRESS = 
-  (import.meta.env.VITE_CONTRACT_ADDRESS || '0xDdc49E1bA14E64c824B7eDF8924572618fe100AF') as Address;
+  (import.meta.env.VITE_CONTRACT_ADDRESS || '0x8C5Fcb19434aF9Cc255d376C04854d3fD22218A2') as Address;
 
 export const GovernanceABI = [
   {
@@ -45,16 +46,15 @@ export const GovernanceABI = [
       {
         components: [
           { internalType: 'uint256', name: 'id', type: 'uint256' },
-          { internalType: 'string', name: 'title', type: 'string' },
-          { internalType: 'string', name: 'description', type: 'string' },
+          // NOTE: title and description are NOT in storage - fetch from ProposalCreated events
           { internalType: 'address', name: 'proposer', type: 'address' },
-          { internalType: 'uint256', name: 'votesFor', type: 'uint256' },
-          { internalType: 'uint256', name: 'votesAgainst', type: 'uint256' },
-          { internalType: 'uint256', name: 'deadline', type: 'uint256' },
+          { internalType: 'uint128', name: 'votesFor', type: 'uint128' },
+          { internalType: 'uint128', name: 'votesAgainst', type: 'uint128' },
+          { internalType: 'uint64', name: 'deadline', type: 'uint64' },
+          { internalType: 'uint64', name: 'createdAt', type: 'uint64' },
           { internalType: 'bool', name: 'executed', type: 'bool' },
-          { internalType: 'uint256', name: 'createdAt', type: 'uint256' },
         ],
-        internalType: 'struct Governance.Proposal',
+        internalType: 'struct GovernanceOptimized.Proposal',
         name: '',
         type: 'tuple',
       },
@@ -91,11 +91,11 @@ export const GovernanceABI = [
       {
         components: [
           { internalType: 'address', name: 'voter', type: 'address' },
+          { internalType: 'uint128', name: 'votingPower', type: 'uint128' },
+          { internalType: 'uint64', name: 'timestamp', type: 'uint64' },
           { internalType: 'bool', name: 'support', type: 'bool' },
-          { internalType: 'uint256', name: 'votingPower', type: 'uint256' },
-          { internalType: 'uint256', name: 'timestamp', type: 'uint256' },
         ],
-        internalType: 'struct Governance.Vote',
+        internalType: 'struct GovernanceOptimized.Vote',
         name: '',
         type: 'tuple',
       },
@@ -136,14 +136,13 @@ export const GovernanceABI = [
     name: 'proposals',
     outputs: [
       { internalType: 'uint256', name: 'id', type: 'uint256' },
-      { internalType: 'string', name: 'title', type: 'string' },
-      { internalType: 'string', name: 'description', type: 'string' },
+      // NOTE: title and description are NOT in storage - fetch from ProposalCreated events
       { internalType: 'address', name: 'proposer', type: 'address' },
-      { internalType: 'uint256', name: 'votesFor', type: 'uint256' },
-      { internalType: 'uint256', name: 'votesAgainst', type: 'uint256' },
-      { internalType: 'uint256', name: 'deadline', type: 'uint256' },
+      { internalType: 'uint128', name: 'votesFor', type: 'uint128' },
+      { internalType: 'uint128', name: 'votesAgainst', type: 'uint128' },
+      { internalType: 'uint64', name: 'deadline', type: 'uint64' },
+      { internalType: 'uint64', name: 'createdAt', type: 'uint64' },
       { internalType: 'bool', name: 'executed', type: 'bool' },
-      { internalType: 'uint256', name: 'createdAt', type: 'uint256' },
     ],
     stateMutability: 'view',
     type: 'function',
@@ -200,9 +199,9 @@ export const GovernanceABI = [
     name: 'votes',
     outputs: [
       { internalType: 'address', name: 'voter', type: 'address' },
+      { internalType: 'uint128', name: 'votingPower', type: 'uint128' },
+      { internalType: 'uint64', name: 'timestamp', type: 'uint64' },
       { internalType: 'bool', name: 'support', type: 'bool' },
-      { internalType: 'uint256', name: 'votingPower', type: 'uint256' },
-      { internalType: 'uint256', name: 'timestamp', type: 'uint256' },
     ],
     stateMutability: 'view',
     type: 'function',
@@ -229,6 +228,7 @@ export const GovernanceABI = [
       { indexed: true, internalType: 'uint256', name: 'proposalId', type: 'uint256' },
       { indexed: true, internalType: 'address', name: 'proposer', type: 'address' },
       { indexed: false, internalType: 'string', name: 'title', type: 'string' },
+      { indexed: false, internalType: 'string', name: 'description', type: 'string' },
       { indexed: false, internalType: 'uint256', name: 'deadline', type: 'uint256' },
     ],
     name: 'ProposalCreated',

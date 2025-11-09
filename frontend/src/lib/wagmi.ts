@@ -8,7 +8,7 @@ const rpcUrl = (import.meta.env.VITE_RPC_URL as string) || 'https://dream-rpc.so
 
 // Define Somnia Testnet chain (may not be in viem/chains yet)
 export const somniaTestnet = defineChain({
-  id: 123456, // TODO: Get actual chain ID from Somnia docs
+  id: 50312, // Actual Somnia Testnet chain ID
   name: 'Somnia Testnet',
   nativeCurrency: {
     decimals: 18,

@@ -4,6 +4,8 @@ import NotificationCenter from './NotificationCenter';
 import ThemeToggle from './ThemeToggle';
 import MobileNav from './MobileNav';
 import Footer from './Footer';
+import NetworkBanner from './NetworkBanner';
+import VotingPowerBanner from './VotingPowerBanner';
 import type { Notification } from '../types';
 
 interface LayoutProps {
@@ -15,6 +17,8 @@ interface LayoutProps {
 export default function Layout({ children, notifications = [], onDismissNotification }: LayoutProps) {
   return (
     <div className="min-h-screen bg-theme-primary flex flex-col">
+      <NetworkBanner />
+      <VotingPowerBanner />
       <nav className="border-b border-theme-tertiary">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-between h-16">

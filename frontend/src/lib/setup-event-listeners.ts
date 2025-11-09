@@ -37,6 +37,10 @@ export async function setupContractEventListeners(privateKey?: `0x${string}`) {
   // Initialize SDS SDK
   const sdk = await initializeSDK(publicClient, walletClient);
   
+  if (!sdk) {
+    throw new Error('Failed to initialize SDS SDK');
+  }
+  
   // Initialize schemas
   await initializeSchemas(sdk);
 

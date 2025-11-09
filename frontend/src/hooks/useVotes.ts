@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { usePublicClient, useWalletClient, useReadContract, useWatchContractEvent } from 'wagmi';
-import { SDSConnectionManager, getSchemaIds, decodeVote } from '../lib/sds';
+import { usePublicClient, useWalletClient, useReadContract } from 'wagmi';
+import { SDSConnectionManager, decodeVote } from '../lib/sds';
 import { GOVERNANCE_CONTRACT_ADDRESS, GovernanceABI } from '../lib/contracts';
 import type { Vote } from '../types';
 
@@ -59,63 +59,40 @@ export function useVoteSubscription(proposalId: string) {
     fetchVotes();
   }, [publicClient, proposalId, voters]);
 
-  // Watch for VoteCast events (real-time updates)
-  useWatchContractEvent({
-    address: GOVERNANCE_CONTRACT_ADDRESS,
-    abi: GovernanceABI,
-    eventName: 'VoteCast',
-    onLogs(logs) {
-      logs.forEach(async (log) => {
-        const logProposalId = log.args.proposalId?.toString();
-        if (!logProposalId || logProposalId !== proposalId) return;
-
-        try {
-          const vote: Vote = {
-            proposalId,
-            voter: log.args.voter || '',
-            support: log.args.support || false,
-            votingPower: log.args.votingPower || 0n,
-            timestamp: BigInt(Math.floor(Date.now() / 1000)),
-            txHash: log.transactionHash || ('' as `0x${string}`),
-          };
-
-          setVotes(prev => {
-            // Avoid duplicates
-            if (prev.some(v => v.voter === vote.voter && v.proposalId === vote.proposalId)) {
-              return prev;
-            }
-            return [...prev, vote];
-          });
-        } catch (error) {
-          console.error('Failed to process vote event:', error);
-        }
-      });
-    },
-  });
-
-  // SDS subscription (enhancement when available)
+  // SDS subscription for real-time updates
   useEffect(() => {
     if (!publicClient || !proposalId) return;
 
     let mounted = true;
+    let subscriptionKey: string | null = null;
 
     const setupSDSSubscription = async () => {
       try {
-        await connectionManager.connect(publicClient, walletClient || undefined);
-        const { voteSchemaId } = getSchemaIds();
+        const sdk = await connectionManager.connect(publicClient, walletClient || undefined);
         
-        if (!voteSchemaId) {
-          return; // SDS not configured, contract events will handle updates
+        // If SDS is not available, log error
+        if (!sdk) {
+          console.error('SDS SDK not available - real-time vote updates disabled');
+          return;
         }
-
+        
+        // Subscribe to 'VoteCast' event for real-time updates
+        // Per SDS docs: subscribe to EVENT NAMES, not schema IDs
         await connectionManager.subscribe(
-          'VoteCast',
-          [],
+          'VoteCast', // Event name emitted by setAndEmitEvent
+          [], // No additional view calls needed
           (data: any) => {
-            if (!mounted || data.proposalId !== proposalId) return;
+            if (!mounted) return;
             
             try {
-              const vote = decodeVote(data as `0x${string}`);
+              // Data from SDS is already decoded, but we may need to transform it
+              const vote = typeof data === 'string' && data.startsWith('0x')
+                ? decodeVote(data as `0x${string}`)
+                : data;
+              
+              // Filter by proposal ID
+              if (vote.proposalId !== proposalId) return;
+              
               setVotes(prev => {
                 if (prev.some(v => v.voter === vote.voter && v.proposalId === vote.proposalId)) {
                   return prev;
@@ -123,16 +100,17 @@ export function useVoteSubscription(proposalId: string) {
                 return [...prev, vote];
               });
             } catch (error) {
-              console.warn('Failed to decode SDS vote:', error);
+              console.warn('Failed to process SDS vote data:', error);
             }
           },
           (error: Error) => {
             console.error('SDS vote subscription error:', error);
           }
         );
-      } catch (error) {
-        // SDS subscription failed, contract events will handle updates
-        console.warn('SDS subscription not available, using contract events');
+        
+        subscriptionKey = 'VoteCast';
+      } catch (error: any) {
+        console.error('SDS subscription failed:', error.message);
       }
     };
 
@@ -140,7 +118,9 @@ export function useVoteSubscription(proposalId: string) {
 
     return () => {
       mounted = false;
-      connectionManager.disconnect();
+      if (subscriptionKey) {
+        connectionManager.unsubscribe(subscriptionKey);
+      }
     };
   }, [publicClient, walletClient, proposalId, connectionManager]);
 

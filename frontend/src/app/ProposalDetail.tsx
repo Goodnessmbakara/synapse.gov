@@ -1,9 +1,11 @@
 import { useParams, Link } from 'react-router-dom';
-import { useReadContract } from 'wagmi';
+import { useReadContract, usePublicClient } from 'wagmi';
+import { useEffect, useState } from 'react';
 import Layout from '../components/Layout';
 import VoteButton from '../components/VoteButton';
 import QuorumIndicator from '../components/QuorumIndicator';
 import { GOVERNANCE_CONTRACT_ADDRESS, GovernanceABI } from '../lib/contracts';
+import { getProposalMetadata } from '../lib/proposal-metadata';
 import { useVoteSubscription } from '../hooks/useVotes';
 import { useQuorumSubscription } from '../hooks/useQuorum';
 import { useNotifications } from '../hooks/useNotifications';
@@ -13,6 +15,8 @@ import type { Proposal } from '../types';
 export default function ProposalDetail() {
   const { id } = useParams<{ id: string }>();
   const { notifications, dismissNotification, addNotification } = useNotifications();
+  const publicClient = usePublicClient();
+  const [metadata, setMetadata] = useState<{ title: string; description: string } | null>(null);
   
   // Fetch proposal from contract
   const { data: proposalData } = useReadContract({
@@ -21,6 +25,20 @@ export default function ProposalDetail() {
     functionName: 'getProposal',
     args: id ? [BigInt(id)] : undefined,
   });
+
+  // Fetch metadata (title/description) from events
+  useEffect(() => {
+    if (!publicClient || !id) return;
+    
+    const fetchMetadata = async () => {
+      const meta = await getProposalMetadata(publicClient, BigInt(id));
+      if (meta) {
+        setMetadata(meta);
+      }
+    };
+    
+    fetchMetadata();
+  }, [publicClient, id]);
 
   // Fetch quorum from contract
   const { data: quorumData } = useReadContract({
@@ -51,20 +69,20 @@ export default function ProposalDetail() {
   // Convert contract data to Proposal type
   const proposal: Proposal | null = proposalData ? {
     id: id || '',
-    title: proposalData.title,
-    description: proposalData.description,
+    title: metadata?.title || '', // Get from events
+    description: metadata?.description || '', // Get from events
     proposer: proposalData.proposer,
-    votesFor: proposalData.votesFor,
-    votesAgainst: proposalData.votesAgainst,
-    quorumThreshold: quorumData ? BigInt(quorumData[1]) : BigInt(50), // Get from contract
+    votesFor: BigInt(proposalData.votesFor),
+    votesAgainst: BigInt(proposalData.votesAgainst),
+    quorumThreshold: quorumData ? BigInt(quorumData[1]) : BigInt(50),
     currentQuorum: effectiveQuorum ? effectiveQuorum.current : BigInt(0),
-    deadline: proposalData.deadline,
+    deadline: BigInt(proposalData.deadline),
     status: proposalData.executed ? 'executed' : 
             Number(proposalData.deadline) < Date.now() / 1000 ? 
-              (proposalData.votesFor > proposalData.votesAgainst ? 'passed' : 'failed') :
+              (Number(proposalData.votesFor) > Number(proposalData.votesAgainst) ? 'passed' : 'failed') :
               'active',
-    createdAt: proposalData.createdAt,
-    totalVotingPower: totalVotingPower ? BigInt(totalVotingPower) : BigInt(1000000), // Get from contract
+    createdAt: BigInt(proposalData.createdAt),
+    totalVotingPower: totalVotingPower ? BigInt(totalVotingPower) : BigInt(1000000),
   } : null;
 
   const handleVoteSuccess = () => {
@@ -98,18 +116,10 @@ export default function ProposalDetail() {
 
         {/* Proposal Header */}
         <div className="card mb-6 p-4 sm:p-6">
-          <div className="flex flex-col sm:flex-row items-start sm:items-start justify-between mb-4 gap-4">
-            <div className="flex-1 min-w-0">
-              <h1 className="text-2xl sm:text-3xl font-bold mb-2 break-words">{proposal.title}</h1>
-              <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs sm:text-sm text-dark-text-secondary mb-4">
-                <span>By {truncateAddress(proposal.proposer)}</span>
-                <span className="hidden sm:inline">•</span>
-                <span>Created {formatTimestamp(proposal.createdAt)}</span>
-                <span className="hidden sm:inline">•</span>
-                <span>{timeUntil(proposal.deadline)} left</span>
-              </div>
-            </div>
-            <span className={`px-3 py-1 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap ${
+          {/* Title and Status Row */}
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
+            <h1 className="text-2xl sm:text-3xl font-bold break-words flex-1">{proposal.title}</h1>
+            <span className={`px-3 py-1.5 rounded-full text-xs sm:text-sm font-semibold whitespace-nowrap shrink-0 ${
               proposal.status === 'passed' ? 'bg-status-success/20 text-status-success' :
               proposal.status === 'failed' ? 'bg-status-error/20 text-status-error' :
               proposal.status === 'executed' ? 'bg-brand-primary/20 text-brand-primary' :
@@ -119,11 +129,25 @@ export default function ProposalDetail() {
             </span>
           </div>
 
-          <div className="prose prose-invert max-w-none">
-            <p className="text-dark-text-secondary whitespace-pre-wrap">
-              {proposal.description}
-            </p>
+          {/* Metadata Section */}
+          <div className="space-y-2 mb-6 pb-4 border-b border-dark-bg-tertiary">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-dark-text-secondary">
+              <span className="font-medium">By {truncateAddress(proposal.proposer)}</span>
+              <span className="text-dark-text-secondary/60">•</span>
+              <span>Created {formatTimestamp(proposal.createdAt)}</span>
+              <span className="text-dark-text-secondary/60">•</span>
+              <span className="font-medium">{timeUntil(proposal.deadline)} left</span>
+            </div>
           </div>
+
+          {/* Description */}
+          {proposal.description && (
+            <div className="prose prose-invert max-w-none">
+              <p className="text-base text-brand-primary leading-relaxed whitespace-pre-wrap">
+                {proposal.description}
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Voting Section */}

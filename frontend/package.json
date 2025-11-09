@@ -10,7 +10,7 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
-    "@somnia-chain/streams": "^0.1.0",
+    "@somnia-chain/streams": "^0.9.5",
     "@tanstack/react-query": "^5.17.0",
     "framer-motion": "^10.16.16",
     "react": "^18.2.0",

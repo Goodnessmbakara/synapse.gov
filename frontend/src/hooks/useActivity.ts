@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
-import { usePublicClient, useWalletClient, useWatchContractEvent } from 'wagmi';
+import { usePublicClient, useWalletClient } from 'wagmi';
 import { SDSConnectionManager, getSchemaIds } from '../lib/sds';
-import { GOVERNANCE_CONTRACT_ADDRESS, GovernanceABI } from '../lib/contracts';
 import type { ActivityEvent } from '../types';
 
 export function useActivitySubscription() {
@@ -10,120 +9,53 @@ export function useActivitySubscription() {
   const publicClient = usePublicClient();
   const { data: walletClient } = useWalletClient();
 
-  // Watch for ProposalCreated events
-  useWatchContractEvent({
-    address: GOVERNANCE_CONTRACT_ADDRESS,
-    abi: GovernanceABI,
-    eventName: 'ProposalCreated',
-    onLogs(logs) {
-      logs.forEach((log) => {
-        const activity: ActivityEvent = {
-          eventId: log.transactionHash || ('' as `0x${string}`),
-          eventType: 'proposal_created',
-          proposalId: log.args.proposalId?.toString() || '',
-          user: log.args.proposer || '',
-          data: { title: log.args.title || '' },
-          timestamp: BigInt(Math.floor(Date.now() / 1000)),
-        };
-        setActivities(prev => [activity, ...prev].slice(0, 100));
-      });
-    },
-  });
-
-  // Watch for VoteCast events
-  useWatchContractEvent({
-    address: GOVERNANCE_CONTRACT_ADDRESS,
-    abi: GovernanceABI,
-    eventName: 'VoteCast',
-    onLogs(logs) {
-      logs.forEach((log) => {
-        const activity: ActivityEvent = {
-          eventId: log.transactionHash || ('' as `0x${string}`),
-          eventType: 'vote_cast',
-          proposalId: log.args.proposalId?.toString() || '',
-          user: log.args.voter || '',
-          data: {
-            support: log.args.support || false,
-            votingPower: log.args.votingPower?.toString() || '0',
-          },
-          timestamp: BigInt(Math.floor(Date.now() / 1000)),
-        };
-        setActivities(prev => [activity, ...prev].slice(0, 100));
-      });
-    },
-  });
-
-  // Watch for QuorumReached events
-  useWatchContractEvent({
-    address: GOVERNANCE_CONTRACT_ADDRESS,
-    abi: GovernanceABI,
-    eventName: 'QuorumReached',
-    onLogs(logs) {
-      logs.forEach((log) => {
-        const activity: ActivityEvent = {
-          eventId: log.transactionHash || ('' as `0x${string}`),
-          eventType: 'quorum_reached',
-          proposalId: log.args.proposalId?.toString() || '',
-          user: '', // System event
-          data: {},
-          timestamp: BigInt(Math.floor(Date.now() / 1000)),
-        };
-        setActivities(prev => [activity, ...prev].slice(0, 100));
-      });
-    },
-  });
-
-  // Watch for ProposalExecuted events
-  useWatchContractEvent({
-    address: GOVERNANCE_CONTRACT_ADDRESS,
-    abi: GovernanceABI,
-    eventName: 'ProposalExecuted',
-    onLogs(logs) {
-      logs.forEach((log) => {
-        const activity: ActivityEvent = {
-          eventId: log.transactionHash || ('' as `0x${string}`),
-          eventType: 'proposal_executed',
-          proposalId: log.args.proposalId?.toString() || '',
-          user: '', // System event
-          data: {},
-          timestamp: BigInt(Math.floor(Date.now() / 1000)),
-        };
-        setActivities(prev => [activity, ...prev].slice(0, 100));
-      });
-    },
-  });
-
-  // SDS subscription (enhancement when available)
+  // SDS subscription for real-time updates
   useEffect(() => {
     if (!publicClient) return;
 
     let mounted = true;
+    let subscriptionKey: string | null = null;
 
     const setupSDSSubscription = async () => {
       try {
-        await connectionManager.connect(publicClient, walletClient || undefined);
+        const sdk = await connectionManager.connect(publicClient, walletClient || undefined);
+        
+        // If SDS is not available, log error
+        if (!sdk) {
+          console.error('SDS SDK not available - real-time activity updates disabled');
+          return;
+        }
+
         const { activityEventSchemaId } = getSchemaIds();
         
         if (!activityEventSchemaId) {
-          return; // SDS not configured, contract events will handle updates
+          console.warn('Activity event schema ID not configured');
+          return;
         }
-
+        
+        // Subscribe to activity events for real-time updates
+        // Activity events are named like 'Activity_proposal_created', 'Activity_vote_cast', etc.
         await connectionManager.subscribe(
-          'ActivityEvent',
-          [],
+          'Activity_proposal_created', // Subscribe to proposal creation activities
+          [], // No additional view calls needed
           (data: any) => {
             if (!mounted) return;
             
-            const activity = data as ActivityEvent;
-            setActivities(prev => [activity, ...prev].slice(0, 100));
+            try {
+              const activity = data as ActivityEvent;
+              setActivities(prev => [activity, ...prev].slice(0, 100));
+            } catch (error) {
+              console.warn('Failed to process SDS activity data:', error);
+            }
           },
           (error: Error) => {
             console.error('SDS activity subscription error:', error);
           }
         );
-      } catch (error) {
-        // SDS subscription failed, contract events will handle updates
-        console.warn('SDS subscription not available, using contract events');
+        
+        subscriptionKey = 'Activity_proposal_created';
+      } catch (error: any) {
+        console.error('SDS subscription failed:', error.message);
       }
     };
 
@@ -131,7 +63,9 @@ export function useActivitySubscription() {
 
     return () => {
       mounted = false;
-      connectionManager.disconnect();
+      if (subscriptionKey) {
+        connectionManager.unsubscribe(subscriptionKey);
+      }
     };
   }, [publicClient, walletClient, connectionManager]);
 

@@ -51,15 +51,30 @@ export async function setupPublishers(
       };
       void _proposal;
 
-      // Publish to SDS using official SDK method
+      // Publish to SDS and emit event using setAndEmitEvents() method
+      // This stores the data AND emits a 'ProposalCreated' event that can be subscribed to
       if (proposalSchemaId) {
         try {
-          await sdk.streams.publishData(
-            proposalSchemaId,
-            toHex(proposalId.toString(), { size: 32 }),
-            encodeProposal(_proposal),
-            false // Don't register schema (already registered)
+          const dataId = toHex(proposalId.toString(), { size: 32 });
+          // Use setAndEmitEvents to both store data and emit an event
+          // Signature: setAndEmitEvents([{ id, schemaId, data }], [{ id, argumentTopics, data }])
+          const tx = await (sdk.streams as any).setAndEmitEvents(
+            [
+              {
+                id: dataId,
+                schemaId: proposalSchemaId,
+                data: encodeProposal(_proposal),
+              },
+            ],
+            [
+              {
+                id: 'ProposalCreated', // event ID/name
+                argumentTopics: [dataId], // topics for filtering (proposal ID)
+                data: encodeProposal(_proposal), // optional event data
+              },
+            ]
           );
+          console.log('Proposal published and event emitted to SDS with tx hash:', tx);
         } catch (error) {
           console.error('Failed to publish proposal to SDS:', error);
         }
@@ -85,7 +100,7 @@ export async function setupPublishers(
     votingPower: bigint
   ) => {
     try {
-      // Publish vote to SDS
+      // Publish vote to SDS using set() method
       if (voteSchemaId) {
         try {
           const vote = {
@@ -97,12 +112,25 @@ export async function setupPublishers(
             txHash: '' as `0x${string}`,
           };
           
-          await sdk.streams.publishData(
-            voteSchemaId,
-            toHex(`${proposalId}-${voter}`, { size: 32 }),
-            encodeVote(vote),
-            false
+          const dataId = toHex(`${proposalId}-${voter}`, { size: 32 });
+          // Use setAndEmitEvents to both store vote data and emit a 'VoteCast' event
+          const tx = await (sdk.streams as any).setAndEmitEvents(
+            [
+              {
+                id: dataId,
+                schemaId: voteSchemaId,
+                data: encodeVote(vote),
+              },
+            ],
+            [
+              {
+                id: 'VoteCast', // event ID/name
+                argumentTopics: [toHex(proposalId.toString(), { size: 32 }), toHex(voter, { size: 20 })], // proposalId, voter
+                data: encodeVote(vote), // optional event data
+              },
+            ]
           );
+          console.log('Vote published and event emitted to SDS with tx hash:', tx);
         } catch (error) {
           console.error('Failed to publish vote to SDS:', error);
         }
@@ -196,16 +224,20 @@ async function updateProposalVotes(sdk: SDK, contract: any, proposalId: bigint) 
       totalVotingPower: BigInt(totalVotingPower),
     };
 
-    // Update proposal in SDS
+    // Update proposal in SDS using set() method
     const { proposalSchemaId } = getSchemaIds();
     if (proposalSchemaId) {
       try {
-        await sdk.streams.publishData(
-          proposalSchemaId,
-          toHex(proposalId.toString(), { size: 32 }),
-          encodeProposal(proposal),
-          false
-        );
+        const dataId = toHex(proposalId.toString(), { size: 32 });
+        // Update proposal data (no event emission needed for updates)
+        const tx = await (sdk.streams as any).set([
+          {
+            id: dataId,
+            schemaId: proposalSchemaId,
+            data: encodeProposal(proposal),
+          },
+        ]);
+        console.log('Proposal updated in SDS with tx hash:', tx);
       } catch (error) {
         console.error('Failed to update proposal in SDS:', error);
       }
@@ -233,12 +265,25 @@ async function checkQuorumStatus(sdk: SDK, contract: any, proposalId: bigint) {
             { name: 'timestamp', type: 'uint256', value: BigInt(Math.floor(Date.now() / 1000)) },
           ]);
           
-          await sdk.streams.publishData(
-            quorumEventSchemaId,
-            toHex(`quorum-${proposalId}`, { size: 32 }),
-            encoded,
-            false
+          const dataId = toHex(`quorum-${proposalId}`, { size: 32 });
+          // Use setAndEmitEvents to emit 'QuorumReached' event
+          const tx = await (sdk.streams as any).setAndEmitEvents(
+            [
+              {
+                id: dataId,
+                schemaId: quorumEventSchemaId!,
+                data: encoded,
+              },
+            ],
+            [
+              {
+                id: 'QuorumReached', // event ID/name
+                argumentTopics: [toHex(proposalId.toString(), { size: 32 })], // proposalId
+                data: encoded, // optional event data
+              },
+            ]
           );
+          console.log('Quorum event published and emitted to SDS with tx hash:', tx);
         } catch (error) {
           console.error('Failed to publish quorum event to SDS:', error);
         }
@@ -250,8 +295,8 @@ async function checkQuorumStatus(sdk: SDK, contract: any, proposalId: bigint) {
 }
 
 async function publishActivityEvent(
-  _sdk: SDK,
-  _event: {
+  sdk: SDK,
+  event: {
     eventType: string;
     proposalId: string;
     user: string;
@@ -259,15 +304,42 @@ async function publishActivityEvent(
   }
 ) {
   try {
-    // TODO: Update with actual SDS SDK API when available
-    // Use sdk.streams.emitEvents() or sdk.streams.setAndEmitEvents() per official docs
-    // const { activityEventSchemaId } = getSchemaIds();
-    // const eventId = toHex(`${event.proposalId}-${Date.now()}`, { size: 32 });
-    // await sdk.streams.emitEvents([{
-    //   id: 'ActivityEvent',
-    //   argumentTopics: [toHex(event.proposalId, { size: 32 })],
-    //   data: '0x' // optional encoded payload
-    // }]);
+    const { activityEventSchemaId } = getSchemaIds();
+    if (!activityEventSchemaId) {
+      console.warn('Activity event schema ID not available');
+      return;
+    }
+
+    const encoder = new SchemaEncoder('bytes32 eventId, string eventType, bytes32 proposalId, address user, string data, uint256 timestamp');
+    const encoded = encoder.encodeData([
+      { name: 'eventId', type: 'bytes32', value: toHex(`${event.proposalId}-${Date.now()}`, { size: 32 }) },
+      { name: 'eventType', type: 'string', value: event.eventType },
+      { name: 'proposalId', type: 'bytes32', value: toHex(event.proposalId, { size: 32 }) },
+      { name: 'user', type: 'address', value: event.user },
+      { name: 'data', type: 'string', value: JSON.stringify(event.data) },
+      { name: 'timestamp', type: 'uint256', value: BigInt(Math.floor(Date.now() / 1000)) },
+    ]);
+
+    const dataId = toHex(`${event.proposalId}-${Date.now()}`, { size: 32 });
+    // Use setAndEmitEvents to emit activity events
+    const eventName = `Activity_${event.eventType}`; // e.g., 'Activity_proposal_created'
+    const tx = await (sdk.streams as any).setAndEmitEvents(
+      [
+        {
+          id: dataId,
+          schemaId: activityEventSchemaId!,
+          data: encoded,
+        },
+      ],
+      [
+        {
+          id: eventName, // event ID/name
+          argumentTopics: [toHex(event.proposalId, { size: 32 })], // proposalId
+          data: encoded, // optional event data
+        },
+      ]
+    );
+    console.log(`Activity event '${eventName}' published and emitted to SDS with tx hash:`, tx);
   } catch (error) {
     console.error('Failed to publish activity event:', error);
   }
