@@ -39,8 +39,7 @@ export default function WalletConnect() {
       onClick={handleConnect}
       className="btn-primary text-sm sm:text-base px-4 py-2 min-h-[44px]"
     >
-      <span className="hidden sm:inline">Connect Wallet</span>
-      <span className="sm:hidden">Connect</span>
+      Connect Wallet
     </button>
   );
 }

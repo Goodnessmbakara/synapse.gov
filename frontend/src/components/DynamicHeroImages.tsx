@@ -1,70 +1,40 @@
-import { useRef, useEffect, useState } from 'react';
-import { motion, useScroll, useTransform, useMotionValueEvent } from 'framer-motion';
+import { useRef } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
 
 /**
  * Dynamic Hero Images Component
  * Inspired by Tally.xyz landing page
  * Images appear "bent" initially and straighten as user scrolls
- * On mobile: Vertical scrolling drives horizontal card scrolling with scroll-snap
+ * On mobile: Horizontal scroll with snap scrolling
  */
 export default function DynamicHeroImages() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [isMobile, setIsMobile] = useState(false);
   
-  // Check if mobile on mount and resize
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
   // Track scroll progress within this section
-  // Increased scroll distance on mobile to allow all cards to scroll through
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ['start start', 'end start'],
   });
 
-  // Transform values that change based on scroll (desktop only)
-  const rotateX1 = useTransform(scrollYProgress, [0, 1], [35, 0]);
+  // Transform values that change based on scroll
+  // Images start "bent" (perspective distortion) and straighten as you scroll
+  const rotateX1 = useTransform(scrollYProgress, [0, 1], [35, 0]); // Start tilted, end flat
   const rotateX2 = useTransform(scrollYProgress, [0, 1], [25, 0]);
   const rotateX3 = useTransform(scrollYProgress, [0, 1], [30, 0]);
   
-  const rotateY1 = useTransform(scrollYProgress, [0, 1], [-5, 0]);
+  const rotateY1 = useTransform(scrollYProgress, [0, 1], [-5, 0]); // Slight Y rotation for depth
   const rotateY2 = useTransform(scrollYProgress, [0, 1], [5, 0]);
   const rotateY3 = useTransform(scrollYProgress, [0, 1], [-3, 0]);
   
-  const scale = useTransform(scrollYProgress, [0, 1], [1.15, 1]);
-  const opacity = useTransform(scrollYProgress, [0, 1], [1, 0.9]);
+  const scale = useTransform(scrollYProgress, [0, 1], [1.15, 1]); // Start slightly zoomed, end normal
+  const opacity = useTransform(scrollYProgress, [0, 1], [1, 0.9]); // Fade slightly as scroll
   
+  // Parallax effect - images move at different speeds
   const y1 = useTransform(scrollYProgress, [0, 1], [0, -50]);
   const y2 = useTransform(scrollYProgress, [0, 1], [0, -30]);
   const y3 = useTransform(scrollYProgress, [0, 1], [0, -40]);
 
-  // Horizontal scroll progress for mobile (maps vertical scroll to horizontal card position)
-  // Use 0-0.8 of scroll progress to scroll through all cards, leaving 0.8-1 for transition
-  const horizontalScrollProgress = useTransform(scrollYProgress, [0, 0.8], [0, 1]);
-  
-  // Calculate horizontal scroll position for mobile
-  const scrollX = useTransform(horizontalScrollProgress, (progress) => {
-    if (!scrollContainerRef.current || !isMobile) return 0;
-    const container = scrollContainerRef.current;
-    const totalScroll = (container.scrollWidth - container.clientWidth);
-    return Math.min(progress * totalScroll, totalScroll);
-  });
-
-  // Update horizontal scroll position on mobile as user scrolls vertically
-  useMotionValueEvent(scrollX, 'change', (latest) => {
-    if (scrollContainerRef.current && isMobile) {
-      scrollContainerRef.current.scrollLeft = latest;
-    }
-  });
-
-  // Image data
+  // Image data - using gradient backgrounds that represent governance concepts
   const images = [
     {
       id: 1,
@@ -98,28 +68,24 @@ export default function DynamicHeroImages() {
   return (
     <div 
       ref={containerRef} 
-      className="relative w-full h-[600px] sm:h-[500px] md:h-[700px] overflow-hidden mb-8 md:mb-16"
+      className="relative w-full h-[400px] sm:h-[500px] md:h-[700px] overflow-hidden mb-8 md:mb-16"
       style={{ perspective: '1000px' }}
     >
       {/* Background gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-dark-bg-primary via-dark-bg-secondary to-dark-bg-primary opacity-50" />
       
-      {/* Container for images - horizontal scroll on mobile with snap, centered on desktop */}
-      <div 
-        ref={scrollContainerRef}
-        className="relative h-full flex items-center gap-4 md:gap-8 px-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory md:overflow-x-visible md:justify-center md:snap-none" 
-        style={{ transformStyle: 'preserve-3d' }}
-      >
+      {/* Container for images - horizontal scroll on mobile, centered on desktop */}
+      <div className="relative h-full flex items-center gap-4 md:gap-8 px-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory md:overflow-x-visible md:justify-center md:snap-none" style={{ transformStyle: 'preserve-3d' }}>
         {images.map((image, index) => (
           <motion.div
             key={image.id}
             className="relative flex-shrink-0 w-[280px] sm:w-[320px] md:max-w-[400px] h-[300px] sm:h-[350px] md:h-[500px] rounded-2xl overflow-hidden shadow-2xl snap-start"
             style={{
-              rotateX: !isMobile ? image.rotateX : 0,
-              rotateY: !isMobile ? image.rotateY : 0,
-              y: !isMobile ? image.y : 0,
-              scale: !isMobile ? scale : 1,
-              opacity: !isMobile ? opacity : 1,
+              rotateX: image.rotateX,
+              rotateY: image.rotateY,
+              y: image.y,
+              scale,
+              opacity,
               transformStyle: 'preserve-3d',
             }}
             initial={{ opacity: 0, y: 50 }}
